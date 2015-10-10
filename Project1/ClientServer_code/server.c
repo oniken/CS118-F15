@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
                   FD_SET (newsockfd, &active_fd_set);
               }
 
-         if (FD_ISSET(new_sock, &active_fd_set))
+         if (FD_ISSET(newsockfd, &active_fd_set))
          {
                  int n;
             	 char buffer[256];
