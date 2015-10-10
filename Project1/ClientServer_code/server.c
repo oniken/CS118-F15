@@ -44,7 +44,41 @@ int main(int argc, char *argv[])
               error("ERROR on binding");
      
      listen(sockfd,5);	//5 simultaneous connection at most
+     fd_set active_fd_set;
+     FD_ZERO(&active_fd_set);
+     FD_SET(sockfd, &active_fd_set);
+
+     while (1) {
+         if(select(sockfd+1, &active_fd_set, NULL, NULL, NULL)<0) {exit(-1);} /*errors*/
+
+         if(FD_ISSET(sockfd, &active_fd_set)) //new connection request
+              {
+                  size_t client_address_size = sizeof(cli_addr);
+                  newsockfd = accept(sockfd, (struct sockaddr*)&cli_addr, client_address_size);
+                  FD_SET (newsockfd, &active_fd_set);
+              }
+
+         if (FD_ISSET(new_sock, &active_fd_set))
+         {
+                 int n;
+            	 char buffer[256];
+            			 
+            	 memset(buffer, 0, 256);	//reset memory
+               
+             	 //read client's message
+            	 n = read(newsockfd,buffer,255);
+            	 if (n < 0) error("ERROR reading from socket");
+            	 printf("Here is the message:\n%s\n",buffer);
+            	 
+            	 //reply to client
+            	 n = write(newsockfd,"I got your message",18);
+            	 if (n < 0) error("ERROR writing to socket");
+         }
+     }
+     close(newsockfd);//close connection 
+     close(sockfd);
      
+     /*
      //accept connections
      newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
          
@@ -68,7 +102,7 @@ int main(int argc, char *argv[])
      
      close(newsockfd);//close connection 
      close(sockfd);
-         
+     */    
      return 0; 
 }
 
