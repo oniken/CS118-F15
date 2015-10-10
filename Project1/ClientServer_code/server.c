@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
  		 //read client's message
    	 n = read(newsockfd,buffer,255);
    	 if (n < 0) error("ERROR reading from socket");
-   	 printf("Here is the message: %s\n",buffer);
+   	 printf("Here is the message:\n%s\n",buffer);
    	 
    	 //reply to client
    	 n = write(newsockfd,"I got your message",18);
