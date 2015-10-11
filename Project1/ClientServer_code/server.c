@@ -53,29 +53,30 @@ int main(int argc, char *argv[])
 
          if(FD_ISSET(sockfd, &active_fd_set)) //new connection request
               {
-                  size_t client_address_size = sizeof(cli_addr);
-                  newsockfd = accept(sockfd, (struct sockaddr*)&cli_addr, client_address_size);
-                  FD_SET (newsockfd, &active_fd_set);
+                  socklen_t client_address_size = sizeof(cli_addr);
+                  newsockfd = accept(sockfd, (struct sockaddr*)&cli_addr, &client_address_size);
+                  FD_SET(newsockfd, &active_fd_set);
               }
 
          if (FD_ISSET(newsockfd, &active_fd_set))
          {
-                 int n;
-            	 char buffer[256];
-            			 
-            	 memset(buffer, 0, 256);	//reset memory
-               
-             	 //read client's message
-            	 n = read(newsockfd,buffer,255);
-            	 if (n < 0) error("ERROR reading from socket");
-            	 printf("Here is the message:\n%s\n",buffer);
-            	 
-            	 //reply to client
-            	 n = write(newsockfd,"I got your message",18);
-            	 if (n < 0) error("ERROR writing to socket");
+             int n;
+             char buffer[256];
+            		 
+             memset(buffer, 0, 256);	//reset memory
+            
+             //read client's message
+             n = read(newsockfd,buffer,255);
+             if (n < 0) error("ERROR reading from socket");
+             printf("Here is the message:\n%s\n",buffer);
+             
+             //reply to client
+             n = write(newsockfd,"I got your message",18);
+             if (n < 0) error("ERROR writing to socket");
+             close(newsockfd);//close connection 
          }
      }
-     close(newsockfd);//close connection 
+     FD_ZERO(&active_fd_set);
      close(sockfd);
      
      /*
