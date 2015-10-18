@@ -38,7 +38,7 @@
 
 using namespace std;
 
-
+using std::ios;
 
 void error(char *msg)
 
@@ -198,13 +198,16 @@ int main(int argc, char *argv[])
 
             string statusHeader;
 
+            ifstream f(filenamebuff, ios::in|ios::binary|ios::ate);
+
       if(flg) {
 
-        if(file) {
+        /*if(file) {
 
           printf("ENTERED FILE FOUND\n");
 
           statusHeader="HTTP/1.1 200 OK\n";
+
           //TODO FILE TYPE HANDLE
 
           fseek(file, 0L, SEEK_END);
@@ -227,7 +230,43 @@ int main(int argc, char *argv[])
 
           fclose(file);
 
+
+
+
+
+        }*/
+
+        if(f.is_open())
+
+      {
+
+        printf("ENTERED FILE FOUND\n");
+
+              statusHeader="HTTP/1.1 200 OK\n";
+
+        streampos size=f.tellg();
+
+        char* image=new char[size];
+
+        f.seekg(0, ios::beg);
+
+        f.read(image, size);
+
+        f.close();
+
+        i=0;
+
+        while(i<size)
+
+        {
+
+          body+=image[i++];
+
         }
+
+        delete image;
+
+      }
 
         else {
 
@@ -247,13 +286,13 @@ int main(int argc, char *argv[])
 
       if(flg)
 
-              printf("HTTP Response Message: \n%s", response);
+              cout<<"HTTP Response Message: \n"<< response<<endl;
 
             if(flg)
 
             {
 
-              n = write(newsockfd, response, strlen(response)); 
+              n = write(newsockfd, response.c_str(), response.size()); 
 
               if (n < 0) error("ERROR writing to socket");
 
