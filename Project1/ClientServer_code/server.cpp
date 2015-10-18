@@ -31,7 +31,9 @@
 #include <string.h>
 
 #include <regex.h>
+
 #include <sys/stat.h>
+
 #include <errno.h>
 
 using namespace std;
@@ -161,82 +163,93 @@ int main(int argc, char *argv[])
             for(i=5;i<256;i++){
 
               if(buffer[i]==' '&&buffer[i+1]=='H'&&buffer[i+2]=='T'&&buffer[i+3]=='T'&&buffer[i+4]=='P'&&buffer[i+5]=='/')
+
         {
 
                 len=i-5;
+
     break;
+
         }
 
             }
 
             strncpy(filenamebuff, buffer+5, len);
+
       if(len==0)  
 
               filenamebuff[0]='\0';
+
       else filenamebuff[len+1]='\0';
 
-            if(!strcmp(filenamebuff, " ")) printf("Here is the file line:\n%s\n",filenamebuff);
-      else printf("NO FILE ASKED FOR TRANSFER");
+      bool flg=(filenamebuff!=NULL&&filenamebuff[0]!='\0');
+
+            if(flg) printf("Here is the file line:\n2%s2\n",filenamebuff);
+
+      else printf("NO FILE ASKED FOR TRANSFER\n");
 
             FILE* file = fopen(filenamebuff, "r");
 
             int c;
 
-            char* body;
+            string body;
 
             int file_len;
 
-            char* statusHeader;
+            string statusHeader;
 
-            if(file) {
-        printf("ENTERED FILE FOUND");
+      if(flg) {
 
-              statusHeader="HTTP/1.1 200 OK\n";
+        if(file) {
 
-              fseek(file, 0L, SEEK_END);
+          printf("ENTERED FILE FOUND\n");
 
-              file_len=ftell(file);
+          statusHeader="HTTP/1.1 200 OK\n";
+          //TODO FILE TYPE HANDLE
 
-              fseek(file, 0L, SEEK_SET);
+          fseek(file, 0L, SEEK_END);
 
-              body=(char*)malloc(file_len*sizeof(char));
+          file_len=ftell(file);
 
-              i=0;
+          fseek(file, 0L, SEEK_SET);
 
-              c=getc(file);
+          i=0;
 
-              while(c!=EOF) {
+          c=getc(file);
 
-                body[i++]=c;
+          while(c!=EOF) {
 
-                c=getc(file);
+            body+=c;
 
-              }
+            c=getc(file);
 
-              fclose(file);
+          }
 
-            }
+          fclose(file);
 
-            else {
-        printf("ENTERED FILE NOT FOUND");
+        }
 
-              statusHeader="HTTP/1.1 404 Not Found\n";
+        else {
 
-              body="<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
+          printf("ENTERED FILE NOT FOUND\n");
 
-            }
+          statusHeader="HTTP/1.1 404 Not Found\n";
 
-            char response[256+file_len];
+          body="<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
 
-            strcat(response, statusHeader);
+        }
 
-            strcat(response, "\n");
+      }
 
-            strcat(response, body);
+      //strcat(statusHeader, "Content-Type: text/plain");
 
-            printf("HTTP Response Message: \n%s", response);
+            string response=statusHeader+"\n"+body;
 
-            if(!strcmp(body, ""))
+      if(flg)
+
+              printf("HTTP Response Message: \n%s", response);
+
+            if(flg)
 
             {
 
@@ -263,6 +276,8 @@ int main(int argc, char *argv[])
             }
 
             close(newsockfd);//close connection 
+
+      FD_CLR(newsockfd, &active_fd_set);
 
          }
 
