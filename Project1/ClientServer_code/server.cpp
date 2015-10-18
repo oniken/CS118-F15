@@ -95,6 +95,26 @@
               {
                 printf("ENTERED FILE FOUND\n");
                 statusHeader="HTTP/1.1 200 OK\n";
+                // Detect content type from extension
+                string path(filenamebuff);
+                size_t dot = path.find_last_of(".");
+                string ext = path.substr(dot + 1, path.size() - dot);
+
+                statusHeader+="Content-Type: ";
+
+                if (ext == "html") {
+                    statusHeader += "text/html";
+                }
+                else if (ext == "gif") {
+                    statusHeader += "image/gif";
+                }
+                else if (ext == "jpeg") {
+                    statusHeader += "image/jpeg";
+                }
+                else {
+                    statusHeader += "text/plain";
+                }
+                statusHeader += "\n";
                 streampos size=f.tellg();
                 char* image=new char[size];
                 f.seekg(0, ios::beg);
