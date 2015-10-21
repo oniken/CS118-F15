@@ -18,7 +18,8 @@
 #include <sys/stat.h>
 #include <errno.h>
 using namespace std;
-using std::ios;
+using std::ios; // Required for ifstream
+
 void error(char *msg)
 {
  perror(msg);
