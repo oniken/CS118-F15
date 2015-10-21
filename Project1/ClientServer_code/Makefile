@@ -1,5 +1,5 @@
 # the compiler: gcc for C program, define as g++ for C++
-CC = gcc
+CC = g++
 RM = rm -rf
 # compiler flags:
 #  -g    adds debugging information to the executable file
@@ -10,11 +10,8 @@ TARGET = server
 
 all: $(TARGET)
 
-$(TARGET): $(TARGET).c
-	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c
-
-client:
-	gcc -g -o client client.c
+$(TARGET): $(TARGET).cpp
+	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).cpp
 
 clean:
 	$(RM) $(TARGET) $(TARGET).o
