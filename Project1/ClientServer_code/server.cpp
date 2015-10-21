@@ -82,8 +82,7 @@
               filenamebuff[0]='\0';
             else filenamebuff[len+1]='\0';
             bool flg=(filenamebuff!=NULL&&filenamebuff[0]!='\0');
-            if(flg) printf("Here is the file line:\n2%s2\n",filenamebuff);
-            else printf("NO FILE ASKED FOR TRANSFER\n");
+            if (!flg) printf("NO FILE ASKED FOR TRANSFER\n");
             FILE* file = fopen(filenamebuff, "r");
             int c;
             string body;
@@ -93,7 +92,6 @@
             if(flg) {
               if(f.is_open())
               {
-                printf("ENTERED FILE FOUND\n");
                 statusHeader="HTTP/1.1 200 OK\n";
                 // Detect content type from extension
                 string path(filenamebuff);
