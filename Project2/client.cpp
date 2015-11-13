@@ -11,6 +11,17 @@
 #include <stdlib.h>
 #include <strings.h>
 
+#include <netinet/in.h>  // constants and structures needed for internet domain addresses, e.g. sockaddr_in
+#include <sys/wait.h> /* for the waitpid() system call */
+#include <signal.h> /* signal name macros, and the kill() prototype */
+#include <iostream>
+#include <fstream>
+#include <string.h>
+#include <regex.h>
+#include <sys/stat.h>
+#include <errno.h>
+using namespace std;
+using std::ios; // Required for ifstream
 void error(char *msg)
 {
     perror(msg);

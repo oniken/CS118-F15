@@ -7,11 +7,15 @@ CFLAGS  = -g
 
 # the build target executable:
 TARGET = server
+CLINET = client
 
-all: $(TARGET)
+all: $(TARGET) $(CLIENT)
 
 $(TARGET): $(TARGET).cpp
 	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).cpp
+
+$(CLIENT): $(CLIENT).cpp
+	$(CC) $(CFLAGS) -o $(CLIENT) $(CLIENT).cpp
 
 clean:
 	$(RM) $(TARGET) $(TARGET).o
