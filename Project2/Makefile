@@ -18,4 +18,4 @@ $(CLIENT): $(CLIENT).cpp
 	$(CC) $(CFLAGS) -o $(CLIENT) $(CLIENT).cpp
 
 clean:
-	$(RM) $(TARGET) $(TARGET).o
+	$(RM) $(CLIENT) $(CLIENT).o $(CLIENT) $(CLIENT).o
