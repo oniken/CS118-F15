@@ -1,6 +1,9 @@
 #include <iostream>
+#include <vector>
 #include <queue>
 #include <list>
+
+#define MAX_PACKET_SIZE 1024
 
 using namespace std;
 
@@ -8,7 +11,9 @@ class Packet {
     public:
 
     private:
-        int data;
+        char* data;
+        int seq;
+        int ACK;
         bool isAck;
         bool isCorrupted;
 };
@@ -27,5 +32,4 @@ class Window {
         };
         // sequence number
         priority_queue<int, std::vector<int>, comparator> minHeap;
-
 };

@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
    fprintf(stderr,"ERROR, no port provided\n");
    exit(1);
  }
-   sockfd = socket(AF_INET, SOCK_STREAM, 0);  //create socket
+   sockfd = socket(AF_INET, SOCK_DGRAM, 0);  //create socket
    if (sockfd < 0) 
     error("ERROR opening socket");
    memset((char *) &serv_addr, 0, sizeof(serv_addr)); //reset memory
@@ -53,10 +53,11 @@ int main(int argc, char *argv[])
    FD_SET(sockfd, &active_fd_set);
    while (1) {
        // At this point sockfd is only socket in active_fd_set
+       socklen_t client_address_size;
        if(select(sockfd+1, &active_fd_set, NULL, NULL, NULL)<0) {exit(-1);} /*errors*/
        if(FD_ISSET(sockfd, &active_fd_set)) //new connection request
        {
-        socklen_t client_address_size = sizeof(cli_addr);
+        client_address_size = sizeof(cli_addr);
         newsockfd = accept(sockfd, (struct sockaddr*)&cli_addr, &client_address_size);
         FD_SET(newsockfd, &active_fd_set);
       }
@@ -64,10 +65,10 @@ int main(int argc, char *argv[])
       if (FD_ISSET(newsockfd, &active_fd_set))
       {
         int n;
-        char buffer[256];
-          memset(buffer, 0, 256);  //reset memory
+        char buffer[1256];
+          memset(buffer, 0, 1256);  //reset memory
           //read client's message
-          n = read(newsockfd,buffer,255);
+          n = recvfrom(newsockfd,buffer,1255, 0, (struct sockaddr*)&cli_addr, &client_address_size);
           if (n < 0) error("ERROR reading from socket");
           printf("Here is the message:\n%s\n",buffer);
           char filenamebuff[256];
@@ -147,7 +148,7 @@ int main(int argc, char *argv[])
           }
           string response=statusHeader+"\n"+body;
           cout<<"HTTP Response Message: \n"<< response<<endl;
-          n = write(newsockfd, response.c_str(), response.size()); 
+          n = sendto(newsockfd, response.c_str(), response.size(), 0, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in)); 
           if (n < 0) error("ERROR writing to socket");
           close(newsockfd);//close connection 
           // Remove socket from active_fd_set once done serving
