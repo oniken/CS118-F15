@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
     int sockfd; //Socket descriptor
     int portno, n;
     struct sockaddr_in serv_addr;
+    socklen_t server_address_size = sizeof(struct sockaddr_in);
     struct hostent *server; //contains tons of information, including the server's IP address
 
     char buffer[256];
@@ -54,12 +55,12 @@ int main(int argc, char *argv[])
     fgets(buffer,255,stdin);
     
     //n = send(sockfd,buffer,strlen(buffer),0); //send to the socket
-    n = write(sockfd,buffer,strlen(buffer)); //write to the socket
+    n = sendto(sockfd, buffer, strlen(buffer), 0, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in)); 
     if (n < 0) 
          error("ERROR writing to socket");
     
     bzero(buffer,256);
-    n = read(sockfd,buffer,255); //read from the socket
+    n = recvfrom(sockfd,buffer,1255, 0, (struct sockaddr*)&serv_addr, &server_address_size);
     if (n < 0) 
          error("ERROR reading from socket");
     printf("%s\n",buffer);
