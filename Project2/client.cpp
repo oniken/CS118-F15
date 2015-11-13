@@ -20,8 +20,10 @@
 #include <regex.h>
 #include <sys/stat.h>
 #include <errno.h>
+
 using namespace std;
 using std::ios; // Required for ifstream
+
 void error(char *msg)
 {
     perror(msg);
@@ -43,7 +45,7 @@ int main(int argc, char *argv[])
     }
     
     portno = atoi(argv[2]);
-    sockfd = socket(AF_INET, SOCK_STREAM, 0); //create a new socket
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0); //create a new socket
     if (sockfd < 0) 
         error("ERROR opening socket");
     
