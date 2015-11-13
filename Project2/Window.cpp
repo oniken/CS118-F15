@@ -9,14 +9,15 @@ class Packet {
 
     private:
         int data;
-
+        bool isAck;
+        bool isCorrupted;
 };
 
 class Window {
     public:
 
     private:
-        int size;
+        int window_length;
         list<Packet> packets;
         // 
         struct comparator {
