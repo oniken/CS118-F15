@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     socklen_t server_address_size = sizeof(struct sockaddr_in);
     struct hostent *server; //contains tons of information, including the server's IP address
 
-    char buffer[256];
+    char buffer[1256];
     if (argc < 3) {
        fprintf(stderr,"usage %s hostname port\n", argv[0]);
        exit(0);
@@ -63,16 +63,16 @@ int main(int argc, char *argv[])
     if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) //establish a connection to the server
         error("ERROR connecting");
     
-    printf("Please enter the message: ");
-    bzero(buffer,256);
-    fgets(buffer,255,stdin);
+    printf("Please enter file name: ");
+    bzero(buffer,1256);
+    fgets(buffer,1255,stdin);
     
     //n = send(sockfd,buffer,strlen(buffer),0); //send to the socket
     n = sendto(sockfd, buffer, strlen(buffer), 0, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in)); 
     if (n < 0) 
          error("ERROR writing to socket");
     
-    bzero(buffer,256);
+    bzero(buffer,1256);
     n = recvfrom(sockfd,buffer,1255, 0, (struct sockaddr*)&serv_addr, &server_address_size);
     if (n < 0) 
          error("ERROR reading from socket");

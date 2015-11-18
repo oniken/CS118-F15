@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
           memset(filenamebuff, 0, 256);
           int len=0, i=0;
           // Manual regex to find file name
-          for(i=5;i<256;i++){
+          for(i=5;i<1256;i++){
             if(buffer[i]==' '&&buffer[i+1]=='H'&&buffer[i+2]=='T'&&buffer[i+3]=='T'&&buffer[i+4]=='P'&&buffer[i+5]=='/')
             {
               len=i-5;
