@@ -1,7 +1,7 @@
 #include "PacketStream.h"
-int Packet_Stream::initFile(char[] filename){
-    ifstream f(buffer, ios::in|ios::binary|ios::ate);
-            file=f;
+int Packet_Stream::initFile(char* filename){
+            ifstream f(filename, ios::in|ios::binary|ios::ate);
+
             if(f.is_open()) {
                 size=f.tellg();
                 char* image=new char[size];

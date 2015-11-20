@@ -15,7 +15,7 @@ using namespace std;
 class Packet {
     public:
         ~Packet();
-        Packet(char stuff[]);
+        Packet(char* stuff);
         Packet();
         void setIsAck(bool x);
         bool isAck();
@@ -24,7 +24,7 @@ class Packet {
         void setSeqAckNum(int x);
         int getACK();
         int getSeq();
-        void setData();
+        void setData(char* c);
     private:
         char* data;
         int seq;

@@ -1,4 +1,6 @@
-Packet::Packet(char stuff[]) {
+#include "Packet.h"
+
+Packet::Packet(char* stuff) {
     data=stuff;
 }
 Packet::Packet() {
@@ -37,6 +39,6 @@ int Packet::getACK() {
 int Packet::getSeq() {
     return seq;
 }
-void Packet::setData(char c[]) {
+void Packet::setData(char* c) {
     data=c;
 }

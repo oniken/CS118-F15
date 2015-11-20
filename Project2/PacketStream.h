@@ -23,13 +23,12 @@ class Packet_Stream {
         Packet_Stream(int startingseq);
         Packet_Stream();//for complilation purposes
         ~Packet_Stream();
-        int initFile(char filename[]);
+        int initFile(char* filename);
         Packet* get(int x);
         streampos getFileSize();
         int getNumOfPacks();
         int getSizeOfPacket(int i);
     private:
-        ifstream file;
         int start_seq;
         int max_seq;
         streampos size;
