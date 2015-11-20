@@ -42,3 +42,6 @@ int Packet::getSeq() {
 void Packet::setData(char* c) {
     data=c;
 }
+char* Packet::getData() {
+    return data;
+}

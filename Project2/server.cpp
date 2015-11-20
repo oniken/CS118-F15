@@ -17,6 +17,7 @@
 #include <regex.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include "PacketStream.h"
 using namespace std;
 using std::ios; // Required for ifstream
 
@@ -28,7 +29,7 @@ void error(char *msg)
 
 int main(int argc, char *argv[])
 {
- int sockfd, newsockfd, portno, pid;
+ int sockfd, portno, pid;
  socklen_t clilen;
  struct sockaddr_in serv_addr, cli_addr;
  if (argc < 2) {
@@ -48,114 +49,66 @@ int main(int argc, char *argv[])
     sizeof(serv_addr)) < 0) 
     error("ERROR on binding");
    listen(sockfd,5);  //5 simultaneous connection at most
-   fd_set active_fd_set;
-   FD_ZERO(&active_fd_set);
-   FD_SET(sockfd, &active_fd_set);
+   //fd_set active_fd_set;
+   //FD_ZERO(&active_fd_set);
+   //FD_SET(sockfd, &active_fd_set);
    while (1) {
        // At this point sockfd is only socket in active_fd_set
-       socklen_t client_address_size;
-       if(select(sockfd+1, &active_fd_set, NULL, NULL, NULL)<0) {exit(-1);} /*errors*/
-       if(FD_ISSET(sockfd, &active_fd_set)) //new connection request
-       {
+    Packet* test;
+    
+    char* image;
+    socklen_t client_address_size;
+       //if(select(sockfd+1, &active_fd_set, NULL, NULL, NULL)<0) {exit(-1);} /*errors*/
+      // if(FD_ISSET(sockfd, &active_fd_set)) //new connection request
+      // {
         client_address_size = sizeof(cli_addr);
-        newsockfd = accept(sockfd, (struct sockaddr*)&cli_addr, &client_address_size);
-        FD_SET(newsockfd, &active_fd_set);
-      }
+        //newsockfd = accept(sockfd, (struct sockaddr*)&cli_addr, &client_address_size);
+        //FD_SET(newsockfd, &active_fd_set);
+      //}
+      int s=0;
       // Process connection
-      if (FD_ISSET(newsockfd, &active_fd_set))
-      {
+      //if (FD_ISSET(newsockfd, &active_fd_set))
+      //{
         int n;
-        char buffer[1256];
-          memset(buffer, 0, 1256);  //reset memory
+        char buffer[8];
+          memset(buffer, 0, 8);  //reset memory
           //read client's message
-          n = recvfrom(newsockfd,buffer,1255, 0, (struct sockaddr*)&cli_addr, &client_address_size);
+          n = recvfrom(sockfd,buffer,8, 0, (struct sockaddr*)&cli_addr, &client_address_size);
           if (n < 0) error("ERROR reading from socket");
           printf("Here is the message:\n%s\n",buffer);
-          char filenamebuff[256];
-          memset(filenamebuff, 0, 256);
-          int len=0, i=0;
-          // Manual regex to find file name
-          for(i=5;i<1256;i++){
-            if(buffer[i]==' '&&buffer[i+1]=='H'&&buffer[i+2]=='T'&&buffer[i+3]=='T'&&buffer[i+4]=='P'&&buffer[i+5]=='/')
-            {
-              len=i-5;
-              break;
-            }
-          }
-          // Copy everything after "GET /"
-          strncpy(filenamebuff, buffer+5, len);
-          if(len==0)  
-            filenamebuff[0]='\0';
-          else filenamebuff[len+1]='\0';
-          bool flg=(filenamebuff!=NULL&&filenamebuff[0]!='\0');
-          if (!flg) printf("NO FILE ASKED FOR TRANSFER\n");
-          int c;
-          string body;
-          int file_len;
-          // Will contain reponse code (200/404) and Content-Type
-          string statusHeader;
+
           // Open file stream to send data over newsockfd
-          ifstream f(filenamebuff, ios::in|ios::binary|ios::ate);
-          if(flg) {
-            if(f.is_open())
-            {
-              statusHeader="HTTP/1.1 200 OK\n";
-              // Detect content type from extension
-              string path(filenamebuff);
-              size_t dot = path.find_last_of(".");
-              string ext = path.substr(dot + 1, path.size() - dot);
+          ifstream f("cat.gif", ios::in|ios::binary|ios::ate);
 
-              statusHeader+="Content-Type: ";
+          if(f.is_open())
+          {
+            streampos size=f.tellg();
+            image=new char[size];
 
-              // Handle html, gif, and jpeg files. If any other extension assume plain text file
-              if (ext == "html") {
-                  statusHeader += "text/html";
-              }
-              else if (ext == "gif") {
-                  statusHeader += "image/gif";
-              }
-              else if (ext == "jpeg") {
-                  statusHeader += "image/jpeg";
-              }
-              else {
-                  statusHeader += "text/plain";
-              }
-              statusHeader += "\n";
-              streampos size=f.tellg();
-              char* image=new char[size];
-              
               // Stream operations
-              f.seekg(0, ios::beg);
-              f.read(image, size);
-              f.close();
-              i=0;
-              while(i<size)
-              {
-                body+=image[i++];
-              }
-              delete image;
-            }
-            else {
-              printf("ENTERED FILE NOT FOUND\n");
-              statusHeader="HTTP/1.1 404 Not Found\n";
-              body="<!DOCTYPE html><html><body><h1>404 - Page Not Found</h1></body></html>";
-            }
+            f.seekg(0, ios::beg);
+            f.read(image, size);
+            f.close();
+            test=new Packet(image);
+            s=size;
           }
-          // No file requested, just append default message
           else {
-            statusHeader = "HTTP/1.1 200 OK\n";
-            body = "I got your message";
+            image="ENTERED FILE NOT FOUND\n";
+            printf(image);
+            test=new Packet(image);
+            s=23;
           }
-          string response=statusHeader+"\n"+body;
-          cout<<"HTTP Response Message: \n"<< response<<endl;
-          n = sendto(newsockfd, response.c_str(), response.size(), 0, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in)); 
+          char* response=(char *)test;
+          n = sendto(sockfd, response, s, 0, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in)); 
           if (n < 0) error("ERROR writing to socket");
-          close(newsockfd);//close connection 
+          //close(sockfd);//close connection 
           // Remove socket from active_fd_set once done serving
-          FD_CLR(newsockfd, &active_fd_set);
-        }
+          //FD_CLR(newsockfd, &active_fd_set);
+        //}
+          delete response;
+          delete image;
       }
-      FD_ZERO(&active_fd_set);
+      //FD_ZERO(&active_fd_set);
       close(sockfd);
       return 0;
     }

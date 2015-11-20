@@ -25,6 +25,7 @@ class Packet {
         int getACK();
         int getSeq();
         void setData(char* c);
+        char* getData();
     private:
         char* data;
         int seq;

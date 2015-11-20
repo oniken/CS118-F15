@@ -10,7 +10,7 @@
 #include <netdb.h>      // define structures like hostent
 #include <stdlib.h>
 #include <strings.h>
-
+#include "PacketStream.h"
 #include <netinet/in.h>  // constants and structures needed for internet domain addresses, e.g. sockaddr_in
 #include <sys/wait.h> /* for the waitpid() system call */
 #include <signal.h> /* signal name macros, and the kill() prototype */
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     printf("Please enter file name: ");
     bzero(buffer,1256);
     fgets(buffer,1255,stdin);
-    
+    char* name=buffer;
     //n = send(sockfd,buffer,strlen(buffer),0); //send to the socket
     n = sendto(sockfd, buffer, strlen(buffer), 0, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in)); 
     if (n < 0) 
@@ -76,7 +76,11 @@ int main(int argc, char *argv[])
     n = recvfrom(sockfd,buffer,1255, 0, (struct sockaddr*)&serv_addr, &server_address_size);
     if (n < 0) 
          error("ERROR reading from socket");
-    printf("%s\n",buffer);
+    Packet* op=(Packet*) buffer;
+    ofstream ofs(name, ofstream::out);
+    ofs<<op->getData();
+    ofs.close();
+    printf("SUCCESS\n");
     
     close(sockfd); //close socket
     
