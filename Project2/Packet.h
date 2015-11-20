@@ -21,7 +21,7 @@ class Packet {
         bool isAck();
         bool isCorrupted();
         void setIsCorrupted(float x);
-        void setSeqAckNum(int x);
+        void setSeqAckNum(int x, int y);
         int getACK();
         int getSeq();
         void setData(char* c);

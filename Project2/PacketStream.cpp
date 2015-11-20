@@ -28,7 +28,7 @@ int Packet_Stream::initFile(char* filename){
                     }
                     i++;
                 }
-                delete image[];
+                delete image;
                 return 0;
             }
             else
@@ -42,13 +42,13 @@ Packet_Stream::Packet_Stream(){
     start_seq=0;
     max_seq=0;
 }
-streampos PacketStream::getFileSize() {
+streampos Packet_Stream::getFileSize() {
     return size;
 }
 Packet* Packet_Stream::get(int x) {
     return &data[x];
 }
-Packet_Stream::getNumOfPacks() {
+int Packet_Stream::getNumOfPacks() {
     return packetNumber;
 }
 int Packet_Stream::getSizeOfPacket(int i) {
