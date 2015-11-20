@@ -16,26 +16,6 @@
 
 using namespace std;
 
-class Packet {
-    public:
-
-        bool isCorrupted() {
-            return corrupted;
-        }
-        bool isLost() {
-            return lost;
-        }
-    // private:
-    // for testing sake
-        char* data;
-        int seq;
-        int ACK;
-        bool request;
-        bool ack;
-        bool corrupted;
-        bool lost;
-};
-
 class Window {
     public:
         Window();
