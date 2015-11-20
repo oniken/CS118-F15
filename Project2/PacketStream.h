@@ -33,6 +33,6 @@ class Packet_Stream {
         int start_seq;
         int max_seq;
         streampos size;
-        Packet data[];
+        Packet* data;
         int packetNumber;
 };

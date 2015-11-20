@@ -81,15 +81,15 @@ int ServerWindow::startStreaming(string filename) {
 
 bool ServerWindow::processPacket(Packet packet) {
     // Don't do anything if ACK packet is lost/corrupted
-    if (packet.isLost() || packet.isCorrupted()) {
+    if (packet.isCorrupted()) {
         return true;
     }
-    cout << "Received ACK for packet number " << packet.ack << endl;
-    minHeap.push(packet.seq);
+    cout << "Received ACK for packet number " << packet.getACK() << endl;
+    minHeap.push(packet.getSeq());
     list<Packet>::iterator it = packets.begin();
     while (it != lastPacket) {
         bool entered = false;
-        while (!minHeap.empty() && minHeap.top() == it->seq) {
+        while (!minHeap.empty() && minHeap.top() == it->getSeq()) {
             entered = true;
             minHeap.pop();
         }
@@ -113,15 +113,15 @@ bool ServerWindow::sendPacket(Packet packet) {
     // TODO: Handle socket streaming here and serialization
     
     // Reset timer
-    cout << "Sent packet with sequence number " << packet.seq << endl;
-    timers[packet.seq] = clock();
+    cout << "Sent packet with sequence number " << packet.getSeq() << endl;
+    timers[packet.getSeq()] = clock();
     return true;
 }
 
 void ServerWindow::checkTimeout() {
     clock_t curr_time = clock();
     for (list<Packet>::iterator it = packets.begin(); it != lastPacket; it++) {
-        double duration = (curr_time - timers[it->seq]) / (double) CLOCKS_PER_SEC;
+        double duration = (curr_time - timers[it->getSeq()]) / (double) CLOCKS_PER_SEC;
         if (duration >= TIMEOUT_SEC) {
             sendPacket(*it);
         }
