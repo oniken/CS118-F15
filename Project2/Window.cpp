@@ -1,6 +1,7 @@
 #ifndef WINDOW
 #define WINDOW
 
+#include "PacketStream.h"
 #include <iostream>
 #include <vector>
 #include <algorithm>
