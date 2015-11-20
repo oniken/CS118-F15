@@ -10,7 +10,7 @@ int Packet_Stream::initFile(char[] filename){
                 f.close();
                 float p=size/MAX_PACKET_SIZE;
                 packetNumber=ceil(p);
-                data= Packet[packetNumber];
+                data= new Packet[packetNumber];
                 int i=0;
                 while(i<packetNumber) {
                     if(i==packetNumber-1) {
