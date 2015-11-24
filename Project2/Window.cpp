@@ -43,8 +43,7 @@ Window::Window(int cwnd): window_length(cwnd) {}
 
 class ServerWindow: public Window {
     public:
-        ServerWindow(int cwnd);
-        int startStreaming(string filename);
+        ServerWindow(Packet_Stream stream);
         bool processPacket(Packet packet);
         bool sendPacket(Packet packet);
         void checkTimeout();
@@ -54,7 +53,17 @@ class ServerWindow: public Window {
         unordered_map<int, clock_t> timers;
 };
 
-ServerWindow::ServerWindow(int cwnd): Window(cwnd) {
+ServerWindow::ServerWindow(Packet_Stream stream) {
+}
+
+void ServerWindow::checkTimeout() {
+        clock_t curr_time = clock();
+        for (list<Packet>::iterator it = packets.begin(); it != lastPacket; it++) {
+            double duration = (curr_time - timers[it->getSeq()]) / (double) CLOCKS_PER_SEC;
+                if (duration >= TIMEOUT_SEC) {
+                     sendPacket(*it);
+                }
+        }
 }
 
 

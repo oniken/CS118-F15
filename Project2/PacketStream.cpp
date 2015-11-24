@@ -1,4 +1,5 @@
 #include "PacketStream.h"
+
 int Packet_Stream::initFile(char* filename){
             ifstream f(filename, ios::in|ios::binary|ios::ate);
 
@@ -18,12 +19,14 @@ int Packet_Stream::initFile(char* filename){
                         char* tmp;
                         memcpy(tmp, image, lastPacketSize);
                         data[i].setData(tmp);
+                        data[i].setSeqAckNum(i, -1);
                         break;
                     }
                     else {
                         char* tmp;
                         memcpy(tmp, image, MAX_PACKET_SIZE-sizeof(Packet));
                         data[i].setData(tmp);
+                        data[i].setSeqAckNum(i, -1);
                         image+=(MAX_PACKET_SIZE-sizeof(Packet));
                     }
                     i++;

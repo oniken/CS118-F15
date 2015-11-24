@@ -68,15 +68,17 @@ int main(int argc, char *argv[])
     fgets(buffer,1255,stdin);
     char* name=buffer;
     //n = send(sockfd,buffer,strlen(buffer),0); //send to the socket
-    cout << "Trying to send" << endl;
-    n = sendto(sockfd, buffer, strlen(buffer), 0, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in)); 
+    n = sendto(sockfd, buffer, strlen(buffer) + 1, 0, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in)); 
     if (n < 0) 
          error("ERROR writing to socket");
     
     bzero(buffer,1256);
+    if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) error("ERROR on binding");
+    listen(sockfd, 5);
     n = recvfrom(sockfd,buffer,1255, 0, (struct sockaddr*)&serv_addr, &server_address_size);
     if (n < 0) 
          error("ERROR reading from socket");
+    printf("%s\n", buffer);
     Packet* op=(Packet*) buffer;
     ofstream ofs(name, ofstream::out);
     ofs<<op->getData();

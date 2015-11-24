@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
    //fd_set active_fd_set;
    //FD_ZERO(&active_fd_set);
    //FD_SET(sockfd, &active_fd_set);
-   while (1) {
+  // while (1) {
        // At this point sockfd is only socket in active_fd_set
     Packet* test;
     
@@ -70,15 +70,15 @@ int main(int argc, char *argv[])
       //if (FD_ISSET(newsockfd, &active_fd_set))
       //{
         int n;
-        char buffer[8];
-          memset(buffer, 0, 8);  //reset memory
+        char buffer[18];
+          memset(buffer, 0, 18);  //reset memory
           //read client's message
-          n = recvfrom(sockfd,buffer,11, 0, (struct sockaddr*)&cli_addr, &client_address_size);
+          n = recvfrom(sockfd,buffer,18, 0, (struct sockaddr*)&cli_addr, &client_address_size);
           if (n < 0) error("ERROR reading from socket");
           printf("Here is the message:\n%s\n",buffer);
 
           // Open file stream to send data over newsockfd
-          ifstream f(buffer, ios::in|ios::binary|ios::ate);
+          ifstream f("empty.txt", ios::in|ios::binary|ios::ate);
 
           if(f.is_open())
           {
@@ -88,6 +88,7 @@ int main(int argc, char *argv[])
               // Stream operations
             f.seekg(0, ios::beg);
             f.read(image, size);
+            printf ("%s\n", image);
             f.close();
             test=new Packet(image);
             s=size;
@@ -99,7 +100,7 @@ int main(int argc, char *argv[])
             s=23;
           }
           char* response=(char *)test;
-          n = sendto(sockfd, response, s, 0, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in)); 
+          n = sendto(sockfd, image, s, 0, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in)); 
           if (n < 0) error("ERROR writing to socket");
           //close(sockfd);//close connection 
           // Remove socket from active_fd_set once done serving
@@ -107,7 +108,7 @@ int main(int argc, char *argv[])
         //}
 //          delete test;
 //          delete image;
-      }
+      //}
       //FD_ZERO(&active_fd_set);
       close(sockfd);
       return 0;
