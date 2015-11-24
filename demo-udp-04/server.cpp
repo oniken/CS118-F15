@@ -4,6 +4,20 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <stdio.h>
+#include <sys/types.h>   // definitions of a number of data types used in socket.h and netinet/in.h
+#include <sys/socket.h>  // definitions of structures needed for sockets, e.g. sockaddr
+#include <netinet/in.h>  // constants and structures needed for internet domain addresses, e.g. sockaddr_in
+#include <stdlib.h>
+#include <strings.h>
+#include <sys/wait.h> /* for the waitpid() system call */
+#include <signal.h> /* signal name macros, and the kill() prototype */
+#include <iostream>
+#include <fstream>
+#include <string.h>
+#include <regex.h>
+#include <sys/stat.h>
+#include <errno.h>
 #include "port.h"
 
 #define BUFSIZE 2048
@@ -17,7 +31,7 @@ main(int argc, char **argv)
 	int recvlen;			/* # bytes received */
 	int fd;				/* our socket */
 	int msgcnt = 0;			/* count # of messages we received */
-	unsigned char buf[BUFSIZE];	/* receive buffer */
+	char buf[BUFSIZE];	/* receive buffer */
 
 
 	/* create a UDP socket */

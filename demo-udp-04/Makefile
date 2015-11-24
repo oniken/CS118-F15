@@ -11,9 +11,9 @@ server: server.o
 client: client.o 
 	$(CC) -o client client.o $(LIBS)
 
-server.o: server.c port.h
+server.o: server.cpp port.h
 
-client.o: client.c port.h
+client.o: client.cpp port.h
 
 clean:
 	rm -f server client server.o client.o 
