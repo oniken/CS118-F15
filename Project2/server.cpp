@@ -73,12 +73,12 @@ int main(int argc, char *argv[])
         char buffer[8];
           memset(buffer, 0, 8);  //reset memory
           //read client's message
-          n = recvfrom(sockfd,buffer,8, 0, (struct sockaddr*)&cli_addr, &client_address_size);
+          n = recvfrom(sockfd,buffer,11, 0, (struct sockaddr*)&cli_addr, &client_address_size);
           if (n < 0) error("ERROR reading from socket");
           printf("Here is the message:\n%s\n",buffer);
 
           // Open file stream to send data over newsockfd
-          ifstream f("cat.gif", ios::in|ios::binary|ios::ate);
+          ifstream f(buffer, ios::in|ios::binary|ios::ate);
 
           if(f.is_open())
           {
@@ -105,8 +105,8 @@ int main(int argc, char *argv[])
           // Remove socket from active_fd_set once done serving
           //FD_CLR(newsockfd, &active_fd_set);
         //}
-          delete response;
-          delete image;
+//          delete test;
+//          delete image;
       }
       //FD_ZERO(&active_fd_set);
       close(sockfd);
