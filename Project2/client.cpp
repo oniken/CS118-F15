@@ -60,14 +60,15 @@ int main(int argc, char *argv[])
     bcopy((char *)server->h_addr, (char *)&serv_addr.sin_addr.s_addr, server->h_length);
     serv_addr.sin_port = htons(portno);
     
-    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) //establish a connection to the server
-        error("ERROR connecting");
+    //if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) //establish a connection to the server
+    //    error("ERROR connecting");
     
     printf("Please enter file name: ");
     bzero(buffer,1256);
     fgets(buffer,1255,stdin);
     char* name=buffer;
     //n = send(sockfd,buffer,strlen(buffer),0); //send to the socket
+    cout << "Trying to send" << endl;
     n = sendto(sockfd, buffer, strlen(buffer), 0, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in)); 
     if (n < 0) 
          error("ERROR writing to socket");
