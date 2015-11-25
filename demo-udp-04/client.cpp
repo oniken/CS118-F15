@@ -33,10 +33,10 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include "port.h"
-
-#define BUFLEN 2048
-#define MSGS 5	/* number of messages to send */
-
+#include "PacketStream.h"
+#define BUFLEN 1024
+using namespace std;
+using std::ios;
 int main(void)
 {
 	struct sockaddr_in myaddr, remaddr;
@@ -74,23 +74,56 @@ int main(void)
 		fprintf(stderr, "inet_aton() failed\n");
 		exit(1);
 	}
-
+	/* get file */
+	printf("Please enter file name: ");
+    bzero(buf, BUFLEN);
+    fgets(buf, BUFLEN-1,stdin);
+    string fileName=buf;
 	/* now let's send the messages */
-
-	for (i=0; i < MSGS; i++) {
+	printf("Sending file request packet for file %s to %s port %d\n", buf, server, SERVICE_PORT);
+	if (sendto(fd, buf, strlen(buf)-1, 0, (struct sockaddr *)&remaddr, slen)==-1) {
+		perror("sendto");
+		exit(1);
+	}
+	/* now receive an acknowledgement from the server */
+	recvlen = recvfrom(fd, buf, BUFLEN, 0, (struct sockaddr *)&remaddr, &slen);
+	if (recvlen >= 0) {
+       	buf[recvlen] = 0;	/* expect a printable string - terminate it */
+        printf("received message: \"%s\"\n", numPackets->data);
+    }
+	Packet num=(Packet) buf;
+    int nPackets=atoi(num.getData());
+    Packet_Stream packet_stream;
+    packet_stream.setDataSize(nPackets);
+	for (i=0; i < nPackets; i++) {
+		bzero(buf, BUFLEN);
 		printf("Sending packet %d to %s port %d\n", i, server, SERVICE_PORT);
-		sprintf(buf, "This is packet %d", i);
+		buf=to_string(i);
 		if (sendto(fd, buf, strlen(buf), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 			perror("sendto");
 			exit(1);
 		}
+		bzero(buf, BUFLEN);
 		/* now receive an acknowledgement from the server */
 		recvlen = recvfrom(fd, buf, BUFLEN, 0, (struct sockaddr *)&remaddr, &slen);
-                if (recvlen >= 0) {
-                        buf[recvlen] = 0;	/* expect a printable string - terminate it */
-                        printf("received message: \"%s\"\n", buf);
-                }
+        if (recvlen >= 0) {
+        	buf[recvlen] = 0;	/* expect a printable string - terminate it */
+            printf("received message: \"%s\"\n", buf);
+        }
+        num=(Packet) buf;
+        if(packet_stream.insert(num, i)==-1) {
+        	printf("Insertion in packet stream at larger than size.\n");
+        	break;
+        }
 	}
+	string op="";
+	for(int i=0;i<nPackets;i++) {
+		op+=(packet_stream.get(i))->getData();
+	}
+	ofstream ofs(fileName.c_str(), ofstream::out);
+
+    ofs<<op;
+    ofs.close();
 	close(fd);
 	return 0;
 }

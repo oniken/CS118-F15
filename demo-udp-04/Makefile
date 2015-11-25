@@ -1,15 +1,16 @@
-CC=gcc
+CC=g++
 CFLAGS = -g 
+RM = rm -rf
 # uncomment this for SunOS
 # LIBS = -lsocket -lnsl
 
 all: server client
 
-server: server.o 
-	$(CC) -o server server.o $(LIBS)
+server: server.cpp
+	$(CC) $(CFLAGS) -o server server.cpp PacketStream.cpp Packet.cpp
 
 client: client.o 
-	$(CC) -o client client.o $(LIBS)
+	$(CC) $(CFLAGS) -o client client.o PacketStream.cpp Packet.cpp
 
 server.o: server.cpp port.h
 

@@ -4,26 +4,25 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <stdio.h>
 #include <sys/types.h>   // definitions of a number of data types used in socket.h and netinet/in.h
 #include <sys/socket.h>  // definitions of structures needed for sockets, e.g. sockaddr
 #include <netinet/in.h>  // constants and structures needed for internet domain addresses, e.g. sockaddr_in
-#include <stdlib.h>
 #include <strings.h>
 #include <sys/wait.h> /* for the waitpid() system call */
 #include <signal.h> /* signal name macros, and the kill() prototype */
 #include <iostream>
 #include <fstream>
-#include <string.h>
+#include <string>
 #include <regex.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <sstream>
 #include "port.h"
-
-#define BUFSIZE 2048
-
-int
-main(int argc, char **argv)
+#include "PacketStream.h"
+#define BUFSIZE 1024
+using namespace std;
+using std::ios;
+int main(int argc, char **argv)
 {
 	struct sockaddr_in myaddr;	/* our address */
 	struct sockaddr_in remaddr;	/* remote address */
@@ -52,9 +51,7 @@ main(int argc, char **argv)
 		perror("bind failed");
 		return 0;
 	}
-
-	/* now loop, receiving data and printing what we received */
-	for (;;) {
+	while(1) {
 		printf("waiting on port %d\n", SERVICE_PORT);
 		recvlen = recvfrom(fd, buf, BUFSIZE, 0, (struct sockaddr *)&remaddr, &addrlen);
 		if (recvlen > 0) {
@@ -63,10 +60,52 @@ main(int argc, char **argv)
 		}
 		else
 			printf("uh oh - something went wrong!\n");
-		sprintf(buf, "ack %d", msgcnt++);
-		printf("sending response \"%s\"\n", buf);
-		if (sendto(fd, buf, strlen(buf), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
+		char* image;
+		Packet nPackets;
+		Packet_Stream packetsToSend;
+		int s=0;
+		bool flg=false;
+		if(packetsToSend.initFile(buf)==0) {
+			//ERRORS HERE////////////////////////////
+			stringstream convert;
+			convert<<packetsToSend.getNumOfPacks();
+			string c=convert.str();
+			char* lol=new char[c.length()];
+			for(int i=0;i<c.length();i++)
+				lol[i]=c.at(i);
+			lol[c.length()]='\0';
+			nPackets.setData(lol);
+			/////////////////////////////////////////
+			flg=true;
+		}
+		else
+		{
+			image="-1";
+			nPackets.setData(image);
+		}
+		//sprintf(buf, "ack %d", msgcnt++);
+		printf("sending response \"%s\"\n", image);
+		if (sendto(fd, (char*)&nPackets, s, 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			perror("sendto");
+		if(flg) {
+			/* now loop, receiving data and printing what we received */
+			for (int i=0;i<packetsToSend.getNumOfPacks();i++) {
+				printf("waiting on port %d\n", SERVICE_PORT);
+				recvlen = recvfrom(fd, buf, BUFSIZE, 0, (struct sockaddr *)&remaddr, &addrlen);
+				if (recvlen > 0) {
+					buf[recvlen] = 0;
+					printf("received message: \"%s\" (%d bytes)\n", buf, recvlen);
+				}
+				else
+					printf("uh oh - something went wrong!\n");
+				int getNum=atoi(buf);
+				sprintf(buf, "ack %d", msgcnt++);
+				printf("sending response \"%s\"\n", buf);
+				nPackets=*(packetsToSend.get(getNum));
+				if (sendto(fd, (char*)&nPackets, strlen(buf), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
+					perror("sendto");
+			}
+		}
 	}
 	/* never exits */
 }
