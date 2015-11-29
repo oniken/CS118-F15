@@ -98,7 +98,7 @@ int main(void)
 	for (i=0; i < nPackets; i++) {
 		bzero(buf, BUFLEN);
 		printf("Sending packet %d to %s port %d\n", i, server, SERVICE_PORT);
-		buf=to_string(i);
+		strcpy(buf,to_string(i).c_str());
 		if (sendto(fd, buf, strlen(buf), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 			perror("sendto");
 			exit(1);
