@@ -86,12 +86,13 @@ int main(void)
 		exit(1);
 	}
 	/* now receive an acknowledgement from the server */
+    Packet num;
 	recvlen = recvfrom(fd, buf, BUFLEN, 0, (struct sockaddr *)&remaddr, &slen);
 	if (recvlen >= 0) {
        	buf[recvlen] = 0;	/* expect a printable string - terminate it */
-        printf("received message: \"%s\"\n", numPackets->data);
+	    num=(Packet) buf;
+        printf("received message: \"%s\"\n", num.getData());
     }
-	Packet num=(Packet) buf;
     int nPackets=atoi(num.getData());
     Packet_Stream packet_stream;
     packet_stream.setDataSize(nPackets);
