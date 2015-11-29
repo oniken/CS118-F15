@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 			printf("uh oh - something went wrong!\n");
 		char* image;
 		Packet nPackets;
-		Packet_Stream packetsToSend;
+		PacketStream packetsToSend;
 		int s=0;
 		bool flg=false;
 		if(packetsToSend.initFile(buf)==0) {
@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 			string c=convert.str();
 			char* lol=new char[c.length()];
 			for(int i=0;i<c.length();i++)
-				lol[i]=c.at(i);
+				lol[i]=c[i];
 			lol[c.length()]='\0';
 			nPackets.setData(lol);
 			/////////////////////////////////////////

@@ -94,7 +94,7 @@ int main(void)
         printf("received message: \"%s\"\n", num.getData());
     }
     int nPackets=atoi(num.getData());
-    Packet_Stream packet_stream;
+    PacketStream packet_stream;
     packet_stream.setDataSize(nPackets);
 	for (i=0; i < nPackets; i++) {
 		bzero(buf, BUFLEN);

@@ -43,7 +43,7 @@ Window::Window(int cwnd): window_length(cwnd) {}
 
 class ServerWindow: public Window {
     public:
-        ServerWindow(Packet_Stream stream);
+        ServerWindow(PacketStream stream);
         bool processPacket(Packet packet);
         bool sendPacket(Packet packet);
         void checkTimeout();
@@ -53,7 +53,7 @@ class ServerWindow: public Window {
         unordered_map<int, clock_t> timers;
 };
 
-ServerWindow::ServerWindow(Packet_Stream stream) {
+ServerWindow::ServerWindow(PacketStream stream) {
 }
 
 void ServerWindow::checkTimeout() {

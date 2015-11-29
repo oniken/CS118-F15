@@ -18,11 +18,11 @@ using std::ios;
 
 using namespace std;
 
-class Packet_Stream {
+class PacketStream {
     public:
-        Packet_Stream(int startingseq);
-        Packet_Stream();//for complilation purposes
-        ~Packet_Stream();
+        PacketStream(int startingseq);
+        PacketStream();//for complilation purposes
+        ~PacketStream();
         int initFile(char* filename);
         Packet* get(int x);
         streampos getFileSize();

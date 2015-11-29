@@ -1,6 +1,6 @@
 #include "PacketStream.h"
 
-int Packet_Stream::initFile(char* filename){
+int PacketStream::initFile(char* filename){
             ifstream f(filename, ios::in|ios::binary|ios::ate);
 
             if(f.is_open()) {
@@ -38,38 +38,38 @@ int Packet_Stream::initFile(char* filename){
             else
                 return -1;
 }
-Packet_Stream::Packet_Stream(int startingseq) {
+PacketStream::PacketStream(int startingseq) {
             start_seq=startingseq;
             max_seq=0;
 }
-Packet_Stream::~Packet_Stream() 
+PacketStream::~PacketStream() 
 {
     delete[] data;
 }
-Packet_Stream::Packet_Stream(){
+PacketStream::PacketStream(){
     start_seq=0;
     max_seq=0;
     flg=false;
 }
-streampos Packet_Stream::getFileSize() {
+streampos PacketStream::getFileSize() {
     return size;
 }
-Packet* Packet_Stream::get(int x) {
+Packet* PacketStream::get(int x) {
     if(x>=getNumOfPacks())
         return NULL;
     return &data[x];
 }
-int Packet_Stream::getNumOfPacks() {
+int PacketStream::getNumOfPacks() {
     return packetNumber;
 }
-int Packet_Stream::getSizeOfPacket(int i) {
+int PacketStream::getSizeOfPacket(int i) {
     if(i==getNumOfPacks()-1) {
         return (getFileSize()%(MAX_PACKET_SIZE-sizeof(Packet)))+sizeof(Packet);
     }
     else
         return MAX_PACKET_SIZE;
 }
-int Packet_Stream::setDataSize(int s) {
+int PacketStream::setDataSize(int s) {
     if(!flg) {
         packetNumber=s;
         return 0;
@@ -77,7 +77,7 @@ int Packet_Stream::setDataSize(int s) {
     else
         return -1;
 }
-int Packet_Stream::insert(Packet p, int pos) {
+int PacketStream::insert(Packet p, int pos) {
     if(pos>=getNumOfPacks()) {
         return -1;
     }
