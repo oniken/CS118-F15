@@ -42,6 +42,10 @@ Packet_Stream::Packet_Stream(int startingseq) {
             start_seq=startingseq;
             max_seq=0;
 }
+Packet_Stream::~Packet_Stream() 
+{
+    delete[] data;
+}
 Packet_Stream::Packet_Stream(){
     start_seq=0;
     max_seq=0;
