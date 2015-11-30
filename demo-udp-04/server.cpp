@@ -61,7 +61,6 @@ int main(int argc, char **argv)
 		}
 		else
 			printf("uh oh - something went wrong!\n");
-		char* image;
 		Packet nPackets;
 		PacketStream packetsToSend;
 		int s=0;
@@ -83,7 +82,7 @@ int main(int argc, char **argv)
 		}
 		else
 		{
-			image="-1";
+			char* image="-1";
 			nPackets.setData(image);
 		}
 		bzero(buf, BUFSIZE);
@@ -111,7 +110,6 @@ int main(int argc, char **argv)
 					perror("sendto");
 			}
 		}
-		delete image;
 		bzero(buf, BUFSIZE);
 	}
 	/* never exits */

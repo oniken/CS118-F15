@@ -30,7 +30,8 @@ int PacketStream::initFile(char* filename){
                         break;
                     }
                     else {
-                        char* tmp=new char[MAX_PACKET_SIZE-sizeof(Packet)];
+                        int tmp_size = MAX_PACKET_SIZE-sizeof(Packet);
+                        char* tmp=new char[tmp_size];
                         int j=0;
                         while(j<(MAX_PACKET_SIZE-sizeof(Packet))) {
                             tmp[j]=image[j];
