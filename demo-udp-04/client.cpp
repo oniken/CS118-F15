@@ -32,6 +32,7 @@
 #include <string.h>
 #include <netdb.h>
 #include <sys/socket.h>
+#include <sstream>
 #include "port.h"
 #include "PacketStream.h"
 #define BUFLEN 1024
@@ -85,11 +86,11 @@ int main(void)
 		perror("sendto");
 		exit(1);
 	}
+	bzero(buf, BUFLEN);
 	/* now receive an acknowledgement from the server */
     Packet num;
 	recvlen = recvfrom(fd, buf, BUFLEN, 0, (struct sockaddr *)&remaddr, &slen);
 	if (recvlen >= 0) {
-       	buf[recvlen] = 0;	/* expect a printable string - terminate it */
 	    num=(Packet) buf;
         printf("received message: \"%s\"\n", num.getData());
     }
@@ -99,7 +100,10 @@ int main(void)
 	for (i=0; i < nPackets; i++) {
 		bzero(buf, BUFLEN);
 		printf("Sending packet %d to %s port %d\n", i, server, SERVICE_PORT);
-		strcpy(buf,to_string(i).c_str());
+		stringstream convert;
+		convert<<i;
+		string c=convert.str();
+		strcpy(buf, c.c_str());
 		if (sendto(fd, buf, strlen(buf), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 			perror("sendto");
 			exit(1);

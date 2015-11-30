@@ -9,22 +9,34 @@ int PacketStream::initFile(char* filename){
                 f.seekg(0, ios::beg);
                 f.read(image, size);
                 f.close();
-                float p=size/MAX_PACKET_SIZE;
+                int tmpSize=(static_cast<int>(size));
+                float p=tmpSize/MAX_PACKET_SIZE;
                 packetNumber=ceil(p);
+                packetNumber=(packetNumber==0)?1:packetNumber;
                 data= new Packet[packetNumber];
                 int i=0;
                 while(i<packetNumber) {
                     if(i==packetNumber-1) {
                         int lastPacketSize=size%(MAX_PACKET_SIZE-sizeof(Packet));
-                        char* tmp;
-                        memcpy(tmp, image, lastPacketSize);
+                        char* tmp=new char[lastPacketSize];
+                        int j=0;
+                        while(j<lastPacketSize) {
+                            tmp[j]=image[j];
+                            j++;
+                        }
+                        tmp[j]=0;
                         data[i].setData(tmp);
                         data[i].setSeqAckNum(i, -1);
                         break;
                     }
                     else {
-                        char* tmp;
-                        memcpy(tmp, image, MAX_PACKET_SIZE-sizeof(Packet));
+                        char* tmp=new char[MAX_PACKET_SIZE-sizeof(Packet)];
+                        int j=0;
+                        while(j<(MAX_PACKET_SIZE-sizeof(Packet))) {
+                            tmp[j]=image[j];
+                            j++;
+                        }
+                        tmp[j]=0;
                         data[i].setData(tmp);
                         data[i].setSeqAckNum(i, -1);
                         image+=(MAX_PACKET_SIZE-sizeof(Packet));

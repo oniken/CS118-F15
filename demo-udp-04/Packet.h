@@ -27,7 +27,7 @@ class Packet {
         void setData(char* c);
         char* getData();
     private:
-        char data[PAYLOAD_SIZE];
+        char data[PAYLOAD_SIZE+1];
         int seq;
         int ACK;
         bool Ack;

@@ -52,6 +52,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 	while(1) {
+		bzero(buf, BUFSIZE);
 		printf("waiting on port %d\n", SERVICE_PORT);
 		recvlen = recvfrom(fd, buf, BUFSIZE, 0, (struct sockaddr *)&remaddr, &addrlen);
 		if (recvlen > 0) {
@@ -66,16 +67,18 @@ int main(int argc, char **argv)
 		int s=0;
 		bool flg=false;
 		if(packetsToSend.initFile(buf)==0) {
-			//ERRORS HERE////////////////////////////
+			printf("1\n");
 			stringstream convert;
 			convert<<packetsToSend.getNumOfPacks();
 			string c=convert.str();
-			char* lol=new char[c.length()];
+			char lol[c.length()];
+			printf("2\n");
 			for(int i=0;i<c.length();i++)
 				lol[i]=c[i];
-			lol[c.length()]='\0';
+			lol[c.length()]=0;
+			printf("3\n");
 			nPackets.setData(lol);
-			/////////////////////////////////////////
+			printf("4\n");
 			flg=true;
 		}
 		else
@@ -83,13 +86,15 @@ int main(int argc, char **argv)
 			image="-1";
 			nPackets.setData(image);
 		}
+		bzero(buf, BUFSIZE);
 		//sprintf(buf, "ack %d", msgcnt++);
-		printf("sending response \"%s\"\n", image);
+		printf("sending response \"%s\"\n", nPackets.getData());
 		if (sendto(fd, (char*)&nPackets, s, 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			perror("sendto");
 		if(flg) {
 			/* now loop, receiving data and printing what we received */
 			for (int i=0;i<packetsToSend.getNumOfPacks();i++) {
+				bzero(buf, BUFSIZE);
 				printf("waiting on port %d\n", SERVICE_PORT);
 				recvlen = recvfrom(fd, buf, BUFSIZE, 0, (struct sockaddr *)&remaddr, &addrlen);
 				if (recvlen > 0) {
@@ -106,6 +111,8 @@ int main(int argc, char **argv)
 					perror("sendto");
 			}
 		}
+		delete image;
+		bzero(buf, BUFSIZE);
 	}
 	/* never exits */
 }
