@@ -23,7 +23,7 @@
 #include <signal.h> /* signal name macros, and the kill() prototype */
 #include <iostream>
 #include <fstream>
-#include <string.h>
+#include <string>
 #include <regex.h>
 #include <sys/stat.h>
 #include <errno.h>
