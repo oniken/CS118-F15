@@ -35,7 +35,7 @@
 #include <sstream>
 #include "port.h"
 #include "PacketStream.h"
-#define BUFLEN 1024
+#define BUFLEN 1040
 using namespace std;
 using std::ios;
 int main(void)
@@ -89,13 +89,14 @@ int main(void)
 	bzero(buf, BUFLEN);
 	/* now receive an acknowledgement from the server */
     Packet num;
-	recvlen = recvfrom(fd, buf, BUFLEN, 0, (struct sockaddr *)&remaddr, &slen);
+	recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen);
 	if (recvlen >= 0) {
-        printf("received message: \"%s\"\n", buf);
+        num = (Packet)buf;
+        printf("received message: \"%s\"\n", num.getData());
     }
     int nPackets=atoi(num.getData());
-    PacketStream packet_stream;
-    packet_stream.setDataSize(nPackets);
+    PacketStream packetstream;
+    packetstream.setDataSize(nPackets);
 	for (i=0; i < nPackets; i++) {
 		bzero(buf, BUFLEN);
 		printf("Sending packet %d to %s port %d\n", i, server, SERVICE_PORT);
@@ -115,19 +116,20 @@ int main(void)
             printf("received message: \"%s\"\n", buf);
         }
         num=(Packet) buf;
-        if(packet_stream.insert(num, i)==-1) {
+        if(packetstream.insert(num, i)==-1) {
         	printf("Insertion in packet stream at larger than size.\n");
         	break;
         }
 	}
 	string op="";
 	for(int i=0;i<nPackets;i++) {
-		op+=(packet_stream.get(i))->getData();
+		op+=(packetstream.get(i))->getData();
 	}
+    if (nPackets > 0) {
 	ofstream ofs(fileName.c_str(), ofstream::out);
-
     ofs<<op;
     ofs.close();
+    }
 	close(fd);
 	return 0;
 }

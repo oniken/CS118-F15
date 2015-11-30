@@ -19,7 +19,7 @@
 #include <sstream>
 #include "port.h"
 #include "PacketStream.h"
-#define BUFSIZE 1024
+#define BUFSIZE 1040
 using namespace std;
 using std::ios;
 int main(int argc, char **argv)
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
 		bzero(buf, BUFSIZE);
 		//sprintf(buf, "ack %d", msgcnt++);
 		printf("sending response \"%s\"\n", nPackets.getData());
-		if (sendto(fd, nPackets.getData(), s, 0, (struct sockaddr *)&remaddr, addrlen) < 0)
+		if (sendto(fd, (char*)&nPackets, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			perror("sendto");
 		if(flg) {
 			/* now loop, receiving data and printing what we received */

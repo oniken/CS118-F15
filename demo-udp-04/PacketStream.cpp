@@ -57,7 +57,6 @@ PacketStream::PacketStream(int startingseq) {
 }
 PacketStream::~PacketStream() 
 {
-    delete[] data;
 }
 PacketStream::PacketStream(){
     start_seq=0;
@@ -84,6 +83,7 @@ int PacketStream::getSizeOfPacket(int i) {
 }
 int PacketStream::setDataSize(int s) {
     if(!flg) {
+        data = new Packet[s];
         packetNumber=s;
         return 0;
     }
