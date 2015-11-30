@@ -83,12 +83,13 @@ int main(int argc, char **argv)
 		else
 		{
 			char* image="-1";
+            s = 2;
 			nPackets.setData(image);
 		}
 		bzero(buf, BUFSIZE);
 		//sprintf(buf, "ack %d", msgcnt++);
 		printf("sending response \"%s\"\n", nPackets.getData());
-		if (sendto(fd, (char*)&nPackets, s, 0, (struct sockaddr *)&remaddr, addrlen) < 0)
+		if (sendto(fd, nPackets.getData(), s, 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			perror("sendto");
 		if(flg) {
 			/* now loop, receiving data and printing what we received */

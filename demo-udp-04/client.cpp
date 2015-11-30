@@ -91,8 +91,7 @@ int main(void)
     Packet num;
 	recvlen = recvfrom(fd, buf, BUFLEN, 0, (struct sockaddr *)&remaddr, &slen);
 	if (recvlen >= 0) {
-	    num=(Packet) buf;
-        printf("received message: \"%s\"\n", num.getData());
+        printf("received message: \"%s\"\n", buf);
     }
     int nPackets=atoi(num.getData());
     PacketStream packet_stream;
