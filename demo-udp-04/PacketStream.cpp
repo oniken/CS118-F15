@@ -17,7 +17,7 @@ int PacketStream::initFile(char* filename){
                 int i=0;
                 while(i<packetNumber) {
                     if(i==packetNumber-1) {
-                        int lastPacketSize=size%(MAX_PACKET_SIZE-sizeof(Packet));
+                        int lastPacketSize=size%(MAX_PACKET_SIZE);
                         char* tmp=new char[lastPacketSize];
                         int j=0;
                         while(j<lastPacketSize) {
@@ -30,23 +30,24 @@ int PacketStream::initFile(char* filename){
                         break;
                     }
                     else {
-                        int tmp_size = MAX_PACKET_SIZE-sizeof(Packet);
+                        int tmp_size = MAX_PACKET_SIZE;
                         char* tmp=new char[tmp_size];
                         int j=0;
-                        while(j<(MAX_PACKET_SIZE-sizeof(Packet))) {
+                        while(j<(MAX_PACKET_SIZE)) {
                             tmp[j]=image[j];
                             j++;
                         }
                         tmp[j]=0;
                         data[i].setData(tmp);
                         data[i].setSeqAckNum(i, -1);
-                        image+=(MAX_PACKET_SIZE-sizeof(Packet));
+                        image+=(MAX_PACKET_SIZE);
                     }
                     i++;
                 }
                 flg=true;
-                delete image;
                 return 0;
+                if (image != nullptr)
+                    delete image;
             }
             else
                 return -1;

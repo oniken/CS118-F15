@@ -126,9 +126,10 @@ int main(void)
 		op+=(packetstream.get(i))->getData();
 	}
     if (nPackets > 0) {
-	ofstream ofs(fileName.c_str(), ofstream::out);
+	ofstream ofs(fileName, ofstream::out);
     ofs<<op;
     ofs.close();
+    printf("Received file %s", fileName.c_str());
     }
 	close(fd);
 	return 0;

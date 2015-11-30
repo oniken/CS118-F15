@@ -66,18 +66,14 @@ int main(int argc, char **argv)
 		int s=0;
 		bool flg=false;
 		if(packetsToSend.initFile(buf)==0) {
-			printf("1\n");
 			stringstream convert;
 			convert<<packetsToSend.getNumOfPacks();
 			string c=convert.str();
 			char lol[c.length()];
-			printf("2\n");
 			for(int i=0;i<c.length();i++)
 				lol[i]=c[i];
 			lol[c.length()]=0;
-			printf("3\n");
 			nPackets.setData(lol);
-			printf("4\n");
 			flg=true;
 		}
 		else
@@ -107,9 +103,10 @@ int main(int argc, char **argv)
 				sprintf(buf, "ack %d", msgcnt++);
 				printf("sending response \"%s\"\n", buf);
 				nPackets=*(packetsToSend.get(getNum));
-				if (sendto(fd, (char*)&nPackets, strlen(buf), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
+				if (sendto(fd, (char*)&nPackets, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 					perror("sendto");
 			}
+            printf("Finished sending file!");
 		}
 		bzero(buf, BUFSIZE);
 	}
