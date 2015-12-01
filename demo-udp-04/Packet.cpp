@@ -4,9 +4,10 @@ Packet::Packet(char* stuff) {
     strcpy(data, stuff);
 }
 Packet::Packet() {
-    setIsAck(false);
-    setIsCorrupted(1);
-    setSeqAckNum(0,0);
+    Corrupted=false;
+    ACK=0;
+    seq=0;
+    Ack=false;
 }
 void Packet::setIsAck(bool x) {
     Ack=x;

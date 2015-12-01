@@ -89,7 +89,7 @@ int main(void)
 		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 		do{
 			printf("Sending file request packet for file %s to %s port %d\n", buf, server, SERVICE_PORT);
-			if (sendto(fd, buf,strlen(buf)-1, 0, (struct sockaddr *)&remaddr, slen)==-1) {
+			if (sendto(fd, fileName.c_str(),fileName.size()-1, 0, (struct sockaddr *)&remaddr, slen)==-1) {
 				perror("sendto");
 				exit(1);
 			}
@@ -119,6 +119,7 @@ int main(void)
 			perror("sendto");
 			exit(1);
 		}
+		bzero(buf, BUFLEN);
         while ((recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen))) {
             if (recvlen > 0) {
                 Packet curr = (Packet) buf;
@@ -145,8 +146,11 @@ int main(void)
                 }
             }
         }
+        bzero(buf, BUFLEN);
         while ((recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen))) {
+        	printf("entered second while\n");
 	        if (recvlen >= 0) {
+	        	printf("entered recvlen\n");
 	            num=(Packet) buf;
                 if (num.isCorrupted()) continue;
 	            if(packetstream.insert(num, num.getSeq())==-1) {
@@ -179,6 +183,7 @@ int main(void)
 		        	bzero(buf, BUFLEN);
                 }
             }
+            bzero(buf, BUFLEN);
         }
 
         /*
@@ -208,7 +213,7 @@ int main(void)
 */
 		string op="";
 		for(int i=0;i<nPackets;i++) {
-			op+=(packetstream.get(i))->getData();
+			op+=(packetstream.get(i)).getData();
 		}
 	    if (nPackets > 0) {
 			ofstream ofs(fileName.c_str(), ofstream::out);

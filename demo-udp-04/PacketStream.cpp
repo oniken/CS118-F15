@@ -67,10 +67,10 @@ PacketStream::PacketStream(){
 streampos PacketStream::getFileSize() {
     return size;
 }
-Packet* PacketStream::get(int x) {
+Packet PacketStream::get(int x) {
     if(x>=getNumOfPacks())
         return NULL;
-    return &data[x];
+    return data[x];
 }
 int PacketStream::getNumOfPacks() {
     return packetNumber;

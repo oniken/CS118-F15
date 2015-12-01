@@ -24,7 +24,7 @@ class PacketStream {
         PacketStream();//for complilation purposes
         ~PacketStream();
         int initFile(char* filename);
-        Packet* get(int x);
+        Packet get(int x);
         streampos getFileSize();
         int getNumOfPacks();
         int getSizeOfPacket(int i);

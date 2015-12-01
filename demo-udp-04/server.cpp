@@ -122,8 +122,9 @@ int main(int argc, char **argv)
 		if(flg) {
             list <int> sent_packets;
             set<int> acks;
-            for (int i = 0; i < WINDOW_SIZE; i++) {
-                Packet* curr = packetsToSend.get(i);
+            for (int i = 0; i < min(packetsToSend.getNumOfPacks(), WINDOW_SIZE); i++) {
+                Packet curr = packetsToSend.get(i);
+                printf("sending Packet num : %d\n", i);
 		        if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			    perror("sendto");
                 sent_packets.push_back(i);
@@ -136,7 +137,7 @@ int main(int argc, char **argv)
                     set<int>::iterator ack_it = acks.begin();
                     while (it != sent_packets.end()) {
                         if (ack_it == acks.end()) {
-                            Packet* curr = packetsToSend.get(*it);
+                            Packet curr = packetsToSend.get(*it);
                             sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
                             it++;
                         }
@@ -146,7 +147,7 @@ int main(int argc, char **argv)
                                 ack_it++;
                             }
                             else {
-                                Packet* curr = packetsToSend.get(*it);
+                                Packet curr = packetsToSend.get(*it);
                                 sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
                                 it++;
                             }
@@ -172,7 +173,7 @@ int main(int argc, char **argv)
                             sent_packets.pop_front();
                         }
                         while (sent_packets.size() < WINDOW_SIZE && sent_packets.back() < packetsToSend.getNumOfPacks() - 1) {
-                             Packet* curr = packetsToSend.get(sent_packets.back()+1);
+                             Packet curr = packetsToSend.get(sent_packets.back()+1);
 		                     if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			                 perror("sendto");
                              sent_packets.push_back(sent_packets.back() + 1);
