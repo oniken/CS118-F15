@@ -42,3 +42,6 @@ void Packet::setData(char* c) {
 char* Packet::getData() {
     return data;
 }
+void Packet::setAck(int x) {
+    ACK=x;
+}

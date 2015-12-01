@@ -76,61 +76,71 @@ int main(void)
 		exit(1);
 	}
 	/* get file */
-	printf("Please enter file name: ");
-    bzero(buf, BUFLEN);
-    fgets(buf, BUFLEN-1,stdin);
-    string fileName=buf;
-	/* now let's send the messages */
-	printf("Sending file request packet for file %s to %s port %d\n", buf, server, SERVICE_PORT);
-	if (sendto(fd, buf, strlen(buf)-1, 0, (struct sockaddr *)&remaddr, slen)==-1) {
-		perror("sendto");
-		exit(1);
-	}
-	bzero(buf, BUFLEN);
-	/* now receive an acknowledgement from the server */
-    Packet num;
-	recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen);
-	if (recvlen >= 0) {
-        num = (Packet)buf;
-        printf("received message: \"%s\"\n", num.getData());
-    }
-    int nPackets=atoi(num.getData());
-    PacketStream packetstream;
-    packetstream.setDataSize(nPackets);
-	for (i=0; i < nPackets; i++) {
-		bzero(buf, BUFLEN);
-		printf("Sending packet %d to %s port %d\n", i, server, SERVICE_PORT);
-		stringstream convert;
-		convert<<i;
-		string c=convert.str();
-		strcpy(buf, c.c_str());
-		if (sendto(fd, buf, strlen(buf), 0, (struct sockaddr *)&remaddr, slen)==-1) {
-			perror("sendto");
-			exit(1);
+	while(1) {
+		printf("Please enter file name: ");
+	    bzero(buf, BUFLEN);
+	    fgets(buf, BUFLEN-1,stdin);
+	    string fileName=buf;
+		/* now let's send the messages */
+		struct timeval tv;
+		tv.tv_sec=2;
+		tv.tv_usec=0;
+		Packet num;
+		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
+		do{
+			printf("Sending file request packet for file %s to %s port %d\n", buf, server, SERVICE_PORT);
+			if (sendto(fd, buf, strlen(buf)-1, 0, (struct sockaddr *)&remaddr, slen)==-1) {
+				perror("sendto");
+				exit(1);
+			}
+			bzero(buf, BUFLEN);
+			/* now receive an acknowledgement from the server */
+			recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen);
+			if (recvlen >= 0) {
+		        num = (Packet)buf;
+		        printf("received message: \"%s\"\n", num.getData());
+		    }
+		}while(recvlen<0||num.isCorrupted());
+		if(strcmp(num.getData(),"-1")==0) {
+			continue;
 		}
-		bzero(buf, BUFLEN);
-		/* now receive an acknowledgement from the server */
-		recvlen = recvfrom(fd, buf, BUFLEN, 0, (struct sockaddr *)&remaddr, &slen);
-        if (recvlen >= 0) {
-        	buf[recvlen] = 0;	/* expect a printable string - terminate it */
-            printf("received message: \"%s\"\n", buf);
-        }
-        num=(Packet) buf;
-        if(packetstream.insert(num, i)==-1) {
-        	printf("Insertion in packet stream at larger than size.\n");
-        	break;
-        }
+	    int nPackets=atoi(num.getData());
+	    PacketStream packetstream;
+	    packetstream.setDataSize(nPackets);
+		for (i=0; i < nPackets; i++) {
+			bzero(buf, BUFLEN);
+			printf("Sending packet %d to %s port %d\n", i, server, SERVICE_PORT);
+			stringstream convert;
+			Packet toSend;
+			toSend.setAck(i);
+			if (sendto(fd, (char*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+				perror("sendto");
+				exit(1);
+			}
+			bzero(buf, BUFLEN);
+			/* now receive an acknowledgement from the server */
+			recvlen = recvfrom(fd, buf, BUFLEN, 0, (struct sockaddr *)&remaddr, &slen);
+	        if (recvlen >= 0) {
+	        	buf[recvlen] = 0;	/* expect a printable string - terminate it */
+	            printf("received message: \"%s\"\n", buf);
+	        }
+	        num=(Packet) buf;
+	        if(packetstream.insert(num, i)==-1) {
+	        	printf("Insertion in packet stream at larger than size.\n");
+	        	break;
+	        }
+		}
+		string op="";
+		for(int i=0;i<nPackets;i++) {
+			op+=(packetstream.get(i))->getData();
+		}
+	    if (nPackets > 0) {
+			ofstream ofs(fileName.c_str(), ofstream::out);
+		    ofs<<op;
+		    ofs.close();
+		    printf("Received file %s", fileName.c_str());
+	    }
+		close(fd);
 	}
-	string op="";
-	for(int i=0;i<nPackets;i++) {
-		op+=(packetstream.get(i))->getData();
-	}
-    if (nPackets > 0) {
-		ofstream ofs(fileName.c_str(), ofstream::out);
-	    ofs<<op;
-	    ofs.close();
-	    printf("Received file %s", fileName.c_str());
-    }
-	close(fd);
 	return 0;
 }
