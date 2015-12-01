@@ -144,7 +144,7 @@ int main(int argc, char **argv)
                         continue;
                     }
                     else {
-                        acks.insert(num.getACK());
+                        acks.insert(num.getACK() - 1);
                         list<int>::iterator it = sent_packets.begin();
                         set<int>::iterator ack_it = acks.begin();
                         while (*ack_it == *it) {
