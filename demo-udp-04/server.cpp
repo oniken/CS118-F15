@@ -75,8 +75,10 @@ int main(int argc, char **argv)
 			buf[recvlen] = 0;
 			printf("received message: \"%s\" (%d bytes)\n", buf, recvlen);
 		}
-		else
+		else {
 			printf("uh oh - something went wrong!\n");
+			continue;
+		}
 		Packet nPackets;
 		PacketStream packetsToSend;
 		int s=0;
@@ -99,10 +101,24 @@ int main(int argc, char **argv)
 			nPackets.setData(image);
 		}
 		bzero(buf, BUFSIZE);
-		//sprintf(buf, "ack %d", msgcnt++);
-		printf("sending response \"%s\"\n", nPackets.getData());
-		if (sendto(fd, (char*)&nPackets, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
-			perror("sendto");
+		struct timeval tv;
+		tv.tv_sec=2;
+		tv.tv_usec=0;
+		Packet ack;
+		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
+		do {
+			bzero(buf, BUFSIZE);
+			printf("sending response \"%s\"\n", nPackets.getData());
+			if (sendto(fd, (char*)&nPackets, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
+				perror("sendto");
+			recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &addrlen);
+			if (recvlen >= 0) {
+		        ack = (Packet)buf;
+		        printf("received Ack 0: \"%d\"\n", ack.getACK());
+		        if(!ack.isCorrupted())
+		        	break;
+		    }
+		}while(recvlen<0||ack.isCorrupted());
 		if(flg) {
             list <int> sent_packets;
             set<int> acks;
