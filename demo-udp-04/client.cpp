@@ -123,7 +123,7 @@ int main(void)
         while ((recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen))) {
             if (recvlen > 0) {
                 Packet curr = (Packet) buf;
-                if (curr.getSeq() == -1) {
+                if (curr.getSeq() != 0) {
 	            	if (sendto(fd, (char*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 	            		perror("sendto");
 	            		exit(1);
@@ -132,10 +132,11 @@ int main(void)
                 else {
                     packetstream.insert(curr, 0);
 		        	bzero(buf, BUFLEN);
-		        	printf("Sending packet %d to %s port %d\n", 0, server, SERVICE_PORT);
 		        	stringstream convert;
 		        	Packet toSend;
 		        	toSend.setAck(1);
+                    printf("Received packet %d\n", curr.getSeq());
+                    printf("Sending ACK 1\n");
 		        	if (sendto(fd, (char*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 		        		perror("sendto");
 		        		exit(1);
@@ -148,27 +149,31 @@ int main(void)
         }
         bzero(buf, BUFLEN);
         while ((recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen))) {
-        	printf("entered second while\n");
 	        if (recvlen >= 0) {
 	        	printf("entered recvlen\n");
-	            num=(Packet) buf;
-                if (num.isCorrupted()) continue;
-	            if(packetstream.insert(num, num.getSeq())==-1) {
+	            Packet curr =(Packet) buf;
+             //   if (curr.isCorrupted()) {
+              //      printf("Detected corruption...\n");
+                    printf("Received seq number %d\n", curr.getSeq());
+               //     continue;
+              //  }
+	            if(packetstream.insert(curr, curr.getSeq())==-1) {
 	            	printf("Insertion in packet stream at larger than size.\n");
 	            	continue;
 	            }
                 else {
 		        	bzero(buf, BUFLEN);
-		        	printf("Sending packet %d to %s port %d\n", num.getSeq() + 1, server, SERVICE_PORT);
+		        	printf("Sending packet %d to %s port %d\n", curr.getSeq() + 1, server, SERVICE_PORT);
 		        	stringstream convert;
 		        	Packet toSend;
-		        	toSend.setAck(num.getSeq() + 1);
-                    if (num.getSeq() + 1 != nPackets) {
+		        	toSend.setAck(curr.getSeq() + 1);
+                    if (curr.getSeq() + 1 != nPackets) {
+                    printf("The ACK is %d\n", toSend.getACK());
 		        	if (sendto(fd, (char*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 		        		perror("sendto");
 		        		exit(1);
 		        	}
-                    checked[num.getSeq()] = true;
+                    checked[curr.getSeq()] = true;
                     }
                     bool file_done = false;
                     for (int i = 0; i < nPackets; i++) {

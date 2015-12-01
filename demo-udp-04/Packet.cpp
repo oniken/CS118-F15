@@ -8,6 +8,7 @@ Packet::Packet() {
     ACK=0;
     seq=0;
     Ack=false;
+    bzero(data, PAYLOAD_SIZE + 1);
 }
 void Packet::setIsAck(bool x) {
     Ack=x;
@@ -19,6 +20,9 @@ bool Packet::isCorrupted() {
     return Corrupted;
 }
 void Packet::setIsCorrupted(float x) {
+    //TODO
+    Corrupted = false;
+    return;
     srand(time(NULL));
     if(x>rand()) {
         Corrupted=false;

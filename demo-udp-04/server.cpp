@@ -26,7 +26,7 @@
 #include "port.h"
 #include "PacketStream.h"
 
-#define BUFSIZE 1040
+#define BUFSIZE 1042
 #define WINDOW_SIZE 5
 
 using namespace std;
@@ -102,9 +102,8 @@ int main(int argc, char **argv)
 		}
 		bzero(buf, BUFSIZE);
 		struct timeval tv;
-		tv.tv_sec=2;
+		tv.tv_sec=5;
 		tv.tv_usec=0;
-		Packet ack;
 		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 		do {
 			bzero(buf, BUFSIZE);
@@ -113,24 +112,26 @@ int main(int argc, char **argv)
 				perror("sendto");
 			recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &addrlen);
 			if (recvlen >= 0) {
-		        ack = (Packet)buf;
+		        Packet ack = (Packet)buf;
 		        printf("received Ack 0: \"%d\"\n", ack.getACK());
 		        if(!ack.isCorrupted())
 		        	break;
 		    }
-		}while(recvlen<0||ack.isCorrupted());
+		}while(recvlen<0);
 		if(flg) {
             list <int> sent_packets;
             set<int> acks;
             for (int i = 0; i < min(packetsToSend.getNumOfPacks(), WINDOW_SIZE); i++) {
                 Packet curr = packetsToSend.get(i);
-                printf("sending Packet num : %d\n", i);
+                printf("sending Packet num : %d\n", curr.getSeq());
+                curr.setIsCorrupted(1);
+                printf("sending Packet corrupted : %d\n", curr.isCorrupted());
 		        if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			    perror("sendto");
                 sent_packets.push_back(i);
             }
 
-            while ((recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &addrlen))) {
+            while ((recvlen = recvfrom(fd, buf, BUFSIZE, 0, (struct sockaddr *)&remaddr, &addrlen))) {
                 // TODO add error check here
                 if (recvlen < 0) {
                     list<int>::iterator it = sent_packets.begin();
@@ -157,14 +158,17 @@ int main(int argc, char **argv)
                 else {
                     Packet num = (Packet)buf;
                     if (num.isCorrupted()) {
-                        printf("Received corrupted packet %d\n", num.getSeq());
+                        printf("Received corrupted packet %d\n", num.getACK());
                         continue;
                     }
                     else {
-                        acks.insert(num.getACK() - 1);
+                        printf("Received ACK %d\n", num.getACK());
+                        if (num.getACK() - 1 >= *(sent_packets.begin()))
+                            acks.insert(num.getACK() - 1);
                         list<int>::iterator it = sent_packets.begin();
                         set<int>::iterator ack_it = acks.begin();
                         while (*ack_it == *it) {
+                            printf("Entered here\n");
                             int ack_target = *ack_it;
                             int list_target = *it;
                             ack_it++;
@@ -172,7 +176,12 @@ int main(int argc, char **argv)
                             acks.erase(ack_target);
                             sent_packets.pop_front();
                         }
+                             printf("%d\n", sent_packets.size());
+                             printf("%d\n", sent_packets.back());
+                             printf("%d\n", packetsToSend.getNumOfPacks() - 1);
                         while (sent_packets.size() < WINDOW_SIZE && sent_packets.back() < packetsToSend.getNumOfPacks() - 1) {
+
+                             printf("Sending packet since we received ACK %d\n", sent_packets.back() + 1);
                              Packet curr = packetsToSend.get(sent_packets.back()+1);
 		                     if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			                 perror("sendto");
