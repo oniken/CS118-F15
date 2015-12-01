@@ -12,16 +12,30 @@
 #include <signal.h> /* signal name macros, and the kill() prototype */
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <list>
 #include <string>
 #include <regex.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include <sstream>
+#include <algorithm>
+#include <unordered_map>
 #include "port.h"
 #include "PacketStream.h"
+
 #define BUFSIZE 1040
+#define WINDOW_SIZE 5
+
 using namespace std;
 using std::ios;
+
+struct comparator {
+    bool operator()(int i, int j) {
+        return i > j;
+    }
+};
+
 int main(int argc, char **argv)
 {
 	struct sockaddr_in myaddr;	/* our address */
@@ -88,6 +102,9 @@ int main(int argc, char **argv)
 		if (sendto(fd, (char*)&nPackets, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			perror("sendto");
 		if(flg) {
+            list <Packet> sent_packets;
+            unordered_map<int, clock_t> timers;
+            priority_queue<int, vector<int>, comparator> minHeap;
 			/* now loop, receiving data and printing what we received */
 			for (int i=0;i<packetsToSend.getNumOfPacks();i++) {
 				bzero(buf, BUFSIZE);
