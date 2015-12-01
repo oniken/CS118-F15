@@ -14,13 +14,15 @@
 #include <fstream>
 #include <vector>
 #include <list>
+#include <ctime>
+#include <set>
+#include <cstdio>
 #include <string>
 #include <regex.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include <sstream>
 #include <algorithm>
-#include <unordered_map>
 #include "port.h"
 #include "PacketStream.h"
 
@@ -102,10 +104,73 @@ int main(int argc, char **argv)
 		if (sendto(fd, (char*)&nPackets, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			perror("sendto");
 		if(flg) {
-            list <Packet> sent_packets;
-            unordered_map<int, clock_t> timers;
-            priority_queue<int, vector<int>, comparator> minHeap;
+            list <int> sent_packets;
+            set<int> acks;
+            for (int i = 0; i < WINDOW_SIZE; i++) {
+                Packet* curr = packetsToSend.get(i);
+		        if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
+			    perror("sendto");
+                sent_packets.push_back(i);
+            }
+
+            while ((recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &addrlen))) {
+                // TODO add error check here
+                if (recvlen < 0) {
+                    list<int>::iterator it = sent_packets.begin();
+                    set<int>::iterator ack_it = acks.begin();
+                    while (it != sent_packets.end()) {
+                        if (ack_it == acks.end()) {
+                            Packet* curr = packetsToSend.get(*it);
+                            sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
+                            it++;
+                        }
+                        else {
+                            if (*it == *ack_it) {
+                                it++;
+                                ack_it++;
+                            }
+                            else {
+                                Packet* curr = packetsToSend.get(*it);
+                                sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
+                                it++;
+                            }
+                        }
+                    }    
+                }
+                else {
+                    Packet num = (Packet)buf;
+                    if (num.isCorrupted()) {
+                        printf("Received corrupted packet %d\n", num.getSeq());
+                        continue;
+                    }
+                    else {
+                        acks.insert(num.getACK());
+                        list<int>::iterator it = sent_packets.begin();
+                        set<int>::iterator ack_it = acks.begin();
+                        while (*ack_it == *it) {
+                            int ack_target = *ack_it;
+                            int list_target = *it;
+                            ack_it++;
+                            it++;
+                            acks.erase(ack_target);
+                            sent_packets.pop_front();
+                        }
+                        while (sent_packets.size() < WINDOW_SIZE && sent_packets.back() < packetsToSend.getNumOfPacks() - 1) {
+                             Packet* curr = packetsToSend.get(sent_packets.back()+1);
+		                     if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
+			                 perror("sendto");
+                             sent_packets.push_back(sent_packets.back() + 1);
+                        }
+                        if (sent_packets.empty()) {
+                            printf("Finished file transfer");
+                            break;
+                        }
+                    }
+                }
+            }
+
 			/* now loop, receiving data and printing what we received */
+            /*
 			for (int i=0;i<packetsToSend.getNumOfPacks();i++) {
 				bzero(buf, BUFSIZE);
 				printf("waiting on port %d\n", SERVICE_PORT);
@@ -123,6 +188,7 @@ int main(int argc, char **argv)
 				if (sendto(fd, (char*)&nPackets, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 					perror("sendto");
 			}
+            */
             printf("Finished sending file!");
 		}
 		bzero(buf, BUFSIZE);
