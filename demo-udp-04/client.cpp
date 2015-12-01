@@ -101,12 +101,87 @@ int main(void)
 		        printf("received message: \"%s\"\n", num.getData());
 		    }
 		}while(recvlen<0||num.isCorrupted());
+
 		if(strcmp(num.getData(),"-1")==0) {
 			continue;
 		}
+
 	    int nPackets=atoi(num.getData());
 	    PacketStream packetstream;
 	    packetstream.setDataSize(nPackets);
+        bool *checked = new bool[nPackets];
+        for (int i = 0; i < nPackets; i++) {
+            checked[i] = false;
+        }
+        Packet ack0;
+        ack0.setAck(0);
+		if (sendto(fd, (char*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+			perror("sendto");
+			exit(1);
+		}
+        while ((recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen))) {
+            if (recvlen > 0) {
+                Packet curr = (Packet) buf;
+                if (curr.getSeq() == -1) {
+	            	if (sendto(fd, (char*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+	            		perror("sendto");
+	            		exit(1);
+	            	}
+                }
+                else {
+                    packetstream.insert(curr, 0);
+		        	bzero(buf, BUFLEN);
+		        	printf("Sending packet %d to %s port %d\n", 0, server, SERVICE_PORT);
+		        	stringstream convert;
+		        	Packet toSend;
+		        	toSend.setAck(1);
+		        	if (sendto(fd, (char*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+		        		perror("sendto");
+		        		exit(1);
+		        	}
+                    checked[0] = true;
+		        	bzero(buf, BUFLEN);
+                    break;
+                }
+            }
+        }
+        while ((recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen))) {
+	        if (recvlen >= 0) {
+	            num=(Packet) buf;
+                if (num.isCorrupted()) continue;
+	            if(packetstream.insert(num, num.getSeq())==-1) {
+	            	printf("Insertion in packet stream at larger than size.\n");
+	            	continue;
+	            }
+                else {
+		        	bzero(buf, BUFLEN);
+		        	printf("Sending packet %d to %s port %d\n", num.getSeq() + 1, server, SERVICE_PORT);
+		        	stringstream convert;
+		        	Packet toSend;
+		        	toSend.setAck(num.getSeq() + 1);
+                    if (num.getSeq() + 1 != nPackets) {
+		        	if (sendto(fd, (char*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+		        		perror("sendto");
+		        		exit(1);
+		        	}
+                    checked[num.getSeq()] = true;
+                    }
+                    bool file_done = false;
+                    for (int i = 0; i < nPackets; i++) {
+                        if (checked[i] == false) {
+                            break;
+                        }
+                        if (i == nPackets - 1) {
+                            file_done = true;
+                        }
+                    }
+                    if (file_done) break;
+		        	bzero(buf, BUFLEN);
+                }
+            }
+        }
+
+        /*
 		for (i=0; i < nPackets; i++) {
 			bzero(buf, BUFLEN);
 			printf("Sending packet %d to %s port %d\n", i, server, SERVICE_PORT);
@@ -118,10 +193,9 @@ int main(void)
 				exit(1);
 			}
 			bzero(buf, BUFLEN);
-			/* now receive an acknowledgement from the server */
 			recvlen = recvfrom(fd, buf, BUFLEN, 0, (struct sockaddr *)&remaddr, &slen);
 	        if (recvlen >= 0) {
-	        	buf[recvlen] = 0;	/* expect a printable string - terminate it */
+	        	buf[recvlen] = 0;
 	            printf("received message: \"%s\"\n", buf);
 	        }
 	        num=(Packet) buf;
@@ -130,6 +204,8 @@ int main(void)
 	        	break;
 	        }
 		}
+
+*/
 		string op="";
 		for(int i=0;i<nPackets;i++) {
 			op+=(packetstream.get(i))->getData();
