@@ -9,8 +9,8 @@ all: server client
 server: server.cpp
 	$(CC) $(CFLAGS) -o server server.cpp PacketStream.cpp Packet.cpp
 
-client: client.o 
-	$(CC) $(CFLAGS) -o client client.o PacketStream.cpp Packet.cpp
+client: client.cpp 
+	$(CC) $(CFLAGS) -o client client.cpp PacketStream.cpp Packet.cpp
 
 server.o: server.cpp port.h
 

@@ -10,6 +10,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <list>
+#include <ctime>
+#include <set>
+#include <cstdio>
+#include <string>
+#include <regex.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <sstream>
+#include <algorithm>
 using namespace std;
 #define PAYLOAD_SIZE 1024
 // packet_stream(filename, startingseq, modmaxseq);
@@ -30,7 +43,8 @@ class Packet {
         void setSeq(int x);
     private:
         char data[PAYLOAD_SIZE+1];
-        int seq;
+        char seq[9]; 
+        //int seq;
         int ACK;
         bool Ack;
         bool Corrupted;

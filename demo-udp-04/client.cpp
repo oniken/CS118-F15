@@ -86,7 +86,7 @@ int main(void)
 		tv.tv_sec=2;
 		tv.tv_usec=0;
 		Packet num;
-		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
+		//setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 		do{
 			printf("Sending file request packet for file %s to %s port %d\n", buf, server, SERVICE_PORT);
 			if (sendto(fd, fileName.c_str(),fileName.size()-1, 0, (struct sockaddr *)&remaddr, slen)==-1) {
@@ -183,7 +183,7 @@ int main(void)
                     toSend.setData(lol);
 		        	toSend.setAck(curr.getSeq() + 1);
 		        	toSend.setSeq(curr.getSeq() + 1);
-                    if (curr.getSeq() + 1 != nPackets) {
+                    if (curr.getSeq() + 1 <= nPackets) {
                     printf("The ACK is %d\n", toSend.getACK());
                     printf("The ACKDATA is %s\n", toSend.getData());
                     printf("The ACKSEQ is %d\n", toSend.getSeq());

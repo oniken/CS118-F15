@@ -6,7 +6,8 @@ Packet::Packet(char* stuff) {
 Packet::Packet() {
     Corrupted=false;
     ACK=0;
-    seq=0;
+    seq[0]='0';
+    seq[1]=0;
     Ack=false;
     bzero(data, PAYLOAD_SIZE + 1);
 }
@@ -32,14 +33,14 @@ void Packet::setIsCorrupted(float x) {
 }
 
 void Packet::setSeqAckNum(int m_seq, int m_ack) {
-    seq=m_seq;
+    setSeq(m_seq);
     ACK=m_ack;
 }
 int Packet::getACK() {
     return ACK;
 }
 int Packet::getSeq() {
-    return seq;
+    return atoi(seq);
 }
 void Packet::setData(char* c) {
     strcpy(data, c);
@@ -51,5 +52,10 @@ void Packet::setAck(int x) {
     ACK=x;
 }
 void Packet::setSeq(int x) {
-    seq=x;
+    stringstream convert;
+    convert<<x;
+    string c=convert.str();
+    for(int i=0;i<c.length();i++)
+        seq[i]=c[i];
+    seq[c.length()]=0;
 }
