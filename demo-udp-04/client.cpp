@@ -35,7 +35,7 @@
 #include <sstream>
 #include "port.h"
 #include "PacketStream.h"
-#define BUFLEN 1040
+#define BUFLEN 1034
 using namespace std;
 using std::ios;
 int main(void)
@@ -252,7 +252,7 @@ int main(void)
 		}
 	    if (nPackets > 0) {
 			fileName.erase(remove(fileName.begin(),fileName.end(),'\n'), fileName.end());
-			ofstream ofs(fileName.c_str(), ofstream::out);
+			ofstream ofs(fileName.c_str(), ofstream::out|ofstream::binary);
 		    ofs<<op;
 		    ofs.close();
 		    printf("Received file %s", fileName.c_str());

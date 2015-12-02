@@ -26,7 +26,7 @@
 #include "port.h"
 #include "PacketStream.h"
 
-#define BUFSIZE 1042
+#define BUFSIZE 1034
 #define WINDOW_SIZE 5
 
 using namespace std;

@@ -24,7 +24,7 @@ int PacketStream::initFile(char* filename){
                             tmp[j]=image[j];
                             j++;
                         }
-                        tmp[j]=0;
+                        //tmp[j]=0;
                         data[i].setData(tmp);
                         data[i].setSeq(i);
                         break;
@@ -37,7 +37,7 @@ int PacketStream::initFile(char* filename){
                             tmp[j]=image[j];
                             j++;
                         }
-                        tmp[j]=0;
+                        //tmp[j]=0;
                         data[i].setData(tmp);
                         data[i].setSeq(i);
                         image+=(MAX_PACKET_SIZE);
