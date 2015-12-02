@@ -26,7 +26,7 @@
 using namespace std;
 #define PAYLOAD_SIZE 1024
 struct packet {
-            char data[PAYLOAD_SIZE];
+            char data[PAYLOAD_SIZE+1];
             char seq[9]; 
         //int seq;
         //int ACK;
@@ -50,7 +50,7 @@ class Packet {
         //void setAck(int x);
         void setSeq(int x);
     private:
-        char data[PAYLOAD_SIZE];
+        char data[PAYLOAD_SIZE+1];
         char seq[9]; 
         //int seq;
         //int ACK;
