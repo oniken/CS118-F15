@@ -46,7 +46,7 @@ int PacketStream::initFile(char* filename){
                 }
                 flg=true;
                 if (image)
-                    delete image;
+                   // delete image;
                 return 0;
             }
             else

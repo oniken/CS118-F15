@@ -136,7 +136,7 @@ int main(void)
 		        	Packet toSend;
 		        	toSend.setAck(1);
                     printf("Received packet %d\n", curr.getSeq());
-                    printf("Sending ACK 1\n");
+                    printf("Sending ACK %d\n", toSend.getACK());
 		        	if (sendto(fd, (char*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 		        		perror("sendto");
 		        		exit(1);
@@ -165,7 +165,15 @@ int main(void)
 		        	bzero(buf, BUFLEN);
 		        	printf("Sending packet %d to %s port %d\n", curr.getSeq() + 1, server, SERVICE_PORT);
 		        	stringstream convert;
+                    convert << curr.getSeq() + 1;
+                    string c = convert.str();
+                    char lol[c.length()];
+                    for (int i = 0; i < c.size(); i++) {
+                        lol[i] = c[i];
+                    }
+                    lol[c.length()] = 0;
 		        	Packet toSend;
+                    toSend.setData(lol);
 		        	toSend.setAck(curr.getSeq() + 1);
                     if (curr.getSeq() + 1 != nPackets) {
                     printf("The ACK is %d\n", toSend.getACK());
@@ -173,6 +181,7 @@ int main(void)
 		        		perror("sendto");
 		        		exit(1);
 		        	}
+                    cout << "Finished sending " << toSend.getACK() << endl;
                     checked[curr.getSeq()] = true;
                     }
                     bool file_done = false;

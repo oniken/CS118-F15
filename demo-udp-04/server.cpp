@@ -163,8 +163,11 @@ int main(int argc, char **argv)
                     }
                     else {
                         printf("Received ACK %d\n", num.getACK());
-                        if (num.getACK() - 1 >= *(sent_packets.begin()))
-                            acks.insert(num.getACK() - 1);
+                        printf("Received ACK %s", num.getData());
+                        if (atoi(num.getData()) - 1 >= *(sent_packets.begin())) {
+                            acks.insert(atoi(num.getData()) - 1);
+                            cout << "Inserted an ACK into data structure" << endl;
+                        }
                         list<int>::iterator it = sent_packets.begin();
                         set<int>::iterator ack_it = acks.begin();
                         while (*ack_it == *it) {
@@ -176,8 +179,8 @@ int main(int argc, char **argv)
                             acks.erase(ack_target);
                             sent_packets.pop_front();
                         }
-                             printf("%d\n", sent_packets.size());
-                             printf("%d\n", sent_packets.back());
+                             printf("The size of list is %d\n", sent_packets.size());
+                             printf("The back is %d\n", sent_packets.back());
                              printf("%d\n", packetsToSend.getNumOfPacks() - 1);
                         while (sent_packets.size() < WINDOW_SIZE && sent_packets.back() < packetsToSend.getNumOfPacks() - 1) {
 
@@ -186,6 +189,7 @@ int main(int argc, char **argv)
 		                     if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			                 perror("sendto");
                              sent_packets.push_back(sent_packets.back() + 1);
+                             cout << "Pushed into list " << sent_packets.back() + 1 << endl;
                         }
                         if (sent_packets.empty()) {
                             printf("Finished file transfer");
