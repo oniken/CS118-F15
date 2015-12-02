@@ -106,7 +106,6 @@ int main(int argc, char **argv)
 		tv.tv_usec=0;
 		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 		do {
-			bzero(buf, BUFSIZE);
 			printf("sending response \"%s\"\n", nPackets.getData());
 			if (sendto(fd, (char*)&nPackets, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 				perror("sendto");
@@ -114,9 +113,12 @@ int main(int argc, char **argv)
 			if (recvlen >= 0) {
 		        Packet ack = (Packet)buf;
 		        printf("received Ack 0: \"%d\"\n", ack.getACK());
+		        printf("received AckData 0: %s\n", ack.getData());
+		        printf("received AckSeq 0: %s\n", ack.getSeq());
 		        if(!ack.isCorrupted())
 		        	break;
 		    }
+		    bzero(buf, BUFSIZE);
 		}while(recvlen<0);
 		if(flg) {
             list <int> sent_packets;
@@ -157,15 +159,16 @@ int main(int argc, char **argv)
                 }
                 else {
                     Packet num = (Packet)buf;
-                    if (num.isCorrupted()) {
-                        printf("Received corrupted packet %d\n", num.getACK());
-                        continue;
-                    }
-                    else {
+                    // if (num.isCorrupted()) {
+                    //     printf("Received corrupted packet %d\n", num.getACK());
+                    //     continue;
+                    // }
+                   // else {
                         printf("Received ACK %d\n", num.getACK());
-                        printf("Received ACK %s", num.getData());
-                        if (atoi(num.getData()) - 1 >= *(sent_packets.begin())) {
-                            acks.insert(atoi(num.getData()) - 1);
+                        printf("Received ACKData %s\n", num.getData());
+                        printf("Received ACKSeq %d\n", num.getSeq());
+                        if (num.getSeq() - 1 >= *(sent_packets.begin())) {
+                            acks.insert(num.getSeq() - 1);
                             cout << "Inserted an ACK into data structure" << endl;
                         }
                         list<int>::iterator it = sent_packets.begin();
@@ -195,8 +198,9 @@ int main(int argc, char **argv)
                             printf("Finished file transfer");
                             break;
                         }
-                    }
+                    //}
                 }
+                bzero(buf, BUFSIZE);
             }
 
 			/* now loop, receiving data and printing what we received */

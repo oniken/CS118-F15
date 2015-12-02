@@ -50,3 +50,6 @@ char* Packet::getData() {
 void Packet::setAck(int x) {
     ACK=x;
 }
+void Packet::setSeq(int x) {
+    seq=x;
+}

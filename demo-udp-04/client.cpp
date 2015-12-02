@@ -115,6 +115,9 @@ int main(void)
         }
         Packet ack0;
         ack0.setAck(0);
+        ack0.setSeq(0);
+        ack0.setData("0");
+        printf("Sending Ack %d\n", ack0.getACK());
 		if (sendto(fd, (char*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 			perror("sendto");
 			exit(1);
@@ -175,8 +178,11 @@ int main(void)
 		        	Packet toSend;
                     toSend.setData(lol);
 		        	toSend.setAck(curr.getSeq() + 1);
+		        	toSend.setSeq(curr.getSeq() + 1);
                     if (curr.getSeq() + 1 != nPackets) {
                     printf("The ACK is %d\n", toSend.getACK());
+                    printf("The ACKDATA is %s\n", toSend.getData());
+                    printf("The ACKSEQ is %d\n", toSend.getSeq());
 		        	if (sendto(fd, (char*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 		        		perror("sendto");
 		        		exit(1);
