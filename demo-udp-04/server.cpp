@@ -167,8 +167,8 @@ int main(int argc, char **argv)
                         printf("Received ACK %d\n", num.getACK());
                         printf("Received ACKData %s\n", num.getData());
                         printf("Received ACKSeq %d\n", num.getSeq());
-                        if (num.getSeq() - 1 >= *(sent_packets.begin())) {
-                            acks.insert(num.getSeq() - 1);
+                        if (atoi(num.getData()) - 1 >= *(sent_packets.begin())) {
+                            acks.insert(atoi(num.getData() - 1));
                             cout << "Inserted an ACK into data structure" << endl;
                         }
                         list<int>::iterator it = sent_packets.begin();

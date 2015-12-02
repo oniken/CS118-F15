@@ -138,8 +138,12 @@ int main(void)
 		        	stringstream convert;
 		        	Packet toSend;
 		        	toSend.setAck(1);
+		        	toSend.setData("1");
+		        	toSend.setSeq(1);
                     printf("Received packet %d\n", curr.getSeq());
-                    printf("Sending ACK %d\n", toSend.getACK());
+                    printf("The ACK is %d\n", toSend.getACK());
+                    printf("The ACKDATA is %s\n", toSend.getData());
+                    printf("The ACKSEQ is %d\n", toSend.getSeq());
 		        	if (sendto(fd, (char*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 		        		perror("sendto");
 		        		exit(1);
