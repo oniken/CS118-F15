@@ -112,7 +112,7 @@ int main(int argc, char **argv)
 			recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &addrlen);
 			if (recvlen >= 0) {
 		        Packet ack = (Packet)buf;
-		        printf("received Ack 0: \"%d\"\n", ack.getACK());
+		        //printf("received Ack 0: \"%d\"\n", ack.getACK());
 		        printf("received AckData 0: %s\n", ack.getData());
 		        printf("received AckSeq 0: %s\n", ack.getSeq());
 		        if(!ack.isCorrupted())
@@ -164,7 +164,7 @@ int main(int argc, char **argv)
                     //     continue;
                     // }
                    // else {
-                        printf("Received ACK %d\n", num.getACK());
+                        //printf("Received ACK %d\n", num.getACK());
                         printf("Received ACKData %s\n", num.getData());
                         printf("Received ACKSeq %d\n", num.getSeq());
                         if (atoi(num.getData()) - 1 >= *(sent_packets.begin())) {

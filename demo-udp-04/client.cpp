@@ -79,7 +79,7 @@ int main(void)
 	while(1) {
 		printf("Please enter file name: ");
 	    bzero(buf, BUFLEN);
-	    fgets(buf, BUFLEN-1,stdin);
+	    fgets(buf, BUFLEN,stdin);
 	    string fileName=buf;
 		/* now let's send the messages */
 		struct timeval tv;
@@ -114,10 +114,9 @@ int main(void)
             checked[i] = false;
         }
         Packet ack0;
-        ack0.setAck(0);
         ack0.setSeq(0);
         ack0.setData("0");
-        printf("Sending Ack %d\n", ack0.getACK());
+        printf("Sending Ack %d\n", ack0.getSeq());
 		if (sendto(fd, (char*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 			perror("sendto");
 			exit(1);
@@ -137,11 +136,9 @@ int main(void)
 		        	bzero(buf, BUFLEN);
 		        	stringstream convert;
 		        	Packet toSend;
-		        	toSend.setAck(1);
 		        	toSend.setData("1");
 		        	toSend.setSeq(1);
                     printf("Received packet %d\n", curr.getSeq());
-                    printf("The ACK is %d\n", toSend.getACK());
                     printf("The ACKDATA is %s\n", toSend.getData());
                     printf("The ACKSEQ is %d\n", toSend.getSeq());
 		        	if (sendto(fd, (char*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
@@ -154,62 +151,65 @@ int main(void)
                 }
             }
         }
-        bzero(buf, BUFLEN);
-        while ((recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen))) {
-	        if (recvlen >= 0) {
-	        	printf("entered recvlen\n");
-	            Packet curr =(Packet) buf;
-             //   if (curr.isCorrupted()) {
-              //      printf("Detected corruption...\n");
-                    printf("Received seq number %d\n", curr.getSeq());
-               //     continue;
-              //  }
-	            if(packetstream.insert(curr, curr.getSeq())==-1) {
-	            	printf("Insertion in packet stream at larger than size.\n");
-	            	continue;
-	            }
-                else {
-		        	bzero(buf, BUFLEN);
-		        	printf("Sending packet %d to %s port %d\n", curr.getSeq() + 1, server, SERVICE_PORT);
-		        	stringstream convert;
-                    convert << curr.getSeq() + 1;
-                    string c = convert.str();
-                    char lol[c.length()];
-                    for (int i = 0; i < c.size(); i++) {
-                        lol[i] = c[i];
-                    }
-                    lol[c.length()] = 0;
-		        	Packet toSend;
-                    toSend.setData(lol);
-		        	toSend.setAck(curr.getSeq() + 1);
-		        	toSend.setSeq(curr.getSeq() + 1);
-                    if (curr.getSeq() + 1 <= nPackets) {
-                    printf("The ACK is %d\n", toSend.getACK());
-                    printf("The ACKDATA is %s\n", toSend.getData());
-                    printf("The ACKSEQ is %d\n", toSend.getSeq());
-		        	if (sendto(fd, (char*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
-		        		perror("sendto");
-		        		exit(1);
-		        	}
-                    cout << "Finished sending " << toSend.getACK() << endl;
-                    checked[curr.getSeq()] = true;
-                    }
-                    bool file_done = false;
-                    for (int i = 0; i < nPackets; i++) {
-                        if (checked[i] == false) {
-                            break;
-                        }
-                        if (i == nPackets - 1) {
-                            file_done = true;
-                        }
-                    }
-                    if (file_done) break;
-		        	bzero(buf, BUFLEN);
-                }
-            }
-            bzero(buf, BUFLEN);
+        bool one=false;
+        if(nPackets==1) {
+            one=true;
         }
-
+        bzero(buf, BUFLEN);
+        if(!one) {
+	        while ((recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen))) {
+		        if (recvlen >= 0) {
+		        	printf("entered recvlen\n");
+		            Packet curr =(Packet) buf;
+	             //   if (curr.isCorrupted()) {
+	              //      printf("Detected corruption...\n");
+	                    printf("Received seq number %d\n", curr.getSeq());
+	               //     continue;
+	              //  }
+		            if(packetstream.insert(curr, curr.getSeq())==-1) {
+		            	printf("Insertion in packet stream at larger than size.\n");
+		            	continue;
+		            }
+	                else {
+			        	bzero(buf, BUFLEN);
+			        	printf("Sending packet %d to %s port %d\n", curr.getSeq() + 1, server, SERVICE_PORT);
+			        	stringstream convert;
+	                    convert << curr.getSeq() + 1;
+	                    string c = convert.str();
+	                    char lol[c.length()];
+	                    for (int i = 0; i < c.size(); i++) {
+	                        lol[i] = c[i];
+	                    }
+	                    lol[c.length()] = 0;
+			        	Packet toSend;
+	                    toSend.setData(lol);
+			        	toSend.setSeq(curr.getSeq() + 1);
+	                    if (curr.getSeq() + 1 <= nPackets) {
+	                    printf("The ACKDATA is %s\n", toSend.getData());
+	                    printf("The ACKSEQ is %d\n", toSend.getSeq());
+			        	if (sendto(fd, (char*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+			        		perror("sendto");
+			        		exit(1);
+			        	}
+	                    cout << "Finished sending " << toSend.getSeq() << endl;
+	                    checked[curr.getSeq()] = true;
+	                    }
+	                    bool file_done = false;
+	                    for (int i = 0; i < nPackets; i++) {
+	                        if (checked[i] == false) {
+	                            break;
+	                        }
+	                        if (i == nPackets - 1) {
+	                            file_done = true;
+	                        }
+	                    }
+	                    if (file_done) break;
+			        	bzero(buf, BUFLEN);
+	                }
+	            }
+	            bzero(buf, BUFLEN);
+	        }
+		}
         /*
 		for (i=0; i < nPackets; i++) {
 			bzero(buf, BUFLEN);
@@ -237,9 +237,21 @@ int main(void)
 */
 		string op="";
 		for(int i=0;i<nPackets;i++) {
+			// stringstream convert;
+   //          convert << i;
+   //          string c = convert.str();
+   //          char lol[c.length()];
+   //          for (int j = 0; j < c.size(); j++) {
+   //              lol[j] = c[j];
+   //          }
+   //          lol[c.length()] = 0;
+			// ofstream of("Packet "+lol, ofstream::out);
+		 //    of<<(packetstream.get(i)).getData();
+		 //    of.close();
 			op+=(packetstream.get(i)).getData();
 		}
 	    if (nPackets > 0) {
+			fileName.erase(remove(fileName.begin(),fileName.end(),'\n'), fileName.end());
 			ofstream ofs(fileName.c_str(), ofstream::out);
 		    ofs<<op;
 		    ofs.close();

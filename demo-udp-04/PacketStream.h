@@ -14,7 +14,7 @@
 using namespace std;
 using std::ios;
 
-#define MAX_PACKET_SIZE 1042
+#define MAX_PACKET_SIZE 1024
 
 using namespace std;
 

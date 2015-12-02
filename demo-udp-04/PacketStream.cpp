@@ -12,13 +12,13 @@ int PacketStream::initFile(char* filename){
                 int tmpSize=(static_cast<int>(size));
                 float p=tmpSize/MAX_PACKET_SIZE;
                 packetNumber=ceil(p);
-                packetNumber=(packetNumber==0)?1:packetNumber;
+                int lastPacketSize=size%(MAX_PACKET_SIZE);
+                packetNumber=(lastPacketSize)?packetNumber+1:packetNumber;
                 data= new Packet[packetNumber];
                 int i=0;
                 while(i<packetNumber) {
                     if(i==packetNumber-1) {
-                        int lastPacketSize=size%(MAX_PACKET_SIZE);
-                        char* tmp=new char[lastPacketSize];
+                        char* tmp=new char[MAX_PACKET_SIZE];
                         int j=0;
                         while(j<lastPacketSize) {
                             tmp[j]=image[j];
@@ -26,7 +26,7 @@ int PacketStream::initFile(char* filename){
                         }
                         tmp[j]=0;
                         data[i].setData(tmp);
-                        data[i].setSeqAckNum(i, -1);
+                        data[i].setSeq(i);
                         break;
                     }
                     else {
@@ -39,7 +39,7 @@ int PacketStream::initFile(char* filename){
                         }
                         tmp[j]=0;
                         data[i].setData(tmp);
-                        data[i].setSeqAckNum(i, -1);
+                        data[i].setSeq(i);
                         image+=(MAX_PACKET_SIZE);
                     }
                     i++;
@@ -68,8 +68,6 @@ streampos PacketStream::getFileSize() {
     return size;
 }
 Packet PacketStream::get(int x) {
-    if(x>=getNumOfPacks())
-        return NULL;
     return data[x];
 }
 int PacketStream::getNumOfPacks() {
