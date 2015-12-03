@@ -115,6 +115,7 @@ int main(int argc, char **argv)
 		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 		do {
 			printf("sending response \"%s\"\n", nPackets.getData());
+            nPackets.setIsLost(loss);
 			if (sendto(fd, (char*)&nPackets, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 				perror("sendto");
 			recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &addrlen);
@@ -146,6 +147,7 @@ int main(int argc, char **argv)
                     while (it != sent_packets.end()) {
                         if (ack_it == acks.end()) {
                             Packet curr = packetsToSend.get(*it);
+                            curr.setIsLost(loss);
                             sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
                             it++;
                         }
