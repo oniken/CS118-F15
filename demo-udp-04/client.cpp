@@ -238,13 +238,18 @@ int main(void)
 		}
 
 */
-		char op2[fileSize];
+		unsigned char* op2 = (unsigned char*) malloc(fileSize);
 		for(int i=0;i<nPackets;i++) {
-			strcat(op2, (packetstream.get(i)).getData());
+            if (i == nPackets - 1) {
+			memcpy(&op2[i*MAX_PACKET_SIZE], &(packetstream.get(i).getData()[0]), lastPacketSize);
+            }
+            else {
+			memcpy(&op2[i*MAX_PACKET_SIZE], &(packetstream.get(i).getData()[0]), MAX_PACKET_SIZE);
+            }
 		}
 	    if (nPackets > 0) {
 			fileName.erase(remove(fileName.begin(),fileName.end(),'\n'), fileName.end());
-			FILE* f = fopen(fileName.c_str(), "wb");
+			FILE* f = fopen(fileName.c_str(), "w+");
 			if(f==NULL)
 				printf("Failed to open write file\n");
 			//fwrite(op.c_str(),sizeof(char), op.length(),f);
@@ -252,6 +257,7 @@ int main(void)
 		    printf("Received file %s", fileName.c_str());
 		    fclose(f);
 	    }
+        free(op2);
 		close(fd);
 	}
 	return 0;

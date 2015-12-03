@@ -24,6 +24,9 @@ int PacketStream::initFile(char* filename){
                 data= new Packet[packetNumber];
                 long i=0;
                 long it=0;
+
+                unsigned char* receiving = (unsigned char*) malloc(size);
+
                 while(i<packetNumber) {
                     if(i==packetNumber-1) {
                         char tmp[MAX_PACKET_SIZE];
@@ -34,10 +37,12 @@ int PacketStream::initFile(char* filename){
                         //     it++;
                         // }
                         // tmp[j]=0;
-                        strncpy(tmp, image+it, lastPacketSize);
+                        memcpy(&tmp[0], &image[it], lastPacketSize);
+                        //memcpy(&receiving[it], &image[it], lastPacketSize);
                         //tmp[lastPacketSize]=0;
                         data[i].setData(tmp);
                         data[i].setSeq(i);
+                        memcpy(&receiving[it], &(data[i].getData())[0], lastPacketSize);
                         break;
                     }
                     else {
@@ -49,10 +54,12 @@ int PacketStream::initFile(char* filename){
                         //     it++;
                         // }
                         // tmp[j]=0;
-                        strncpy(tmp, image+it, MAX_PACKET_SIZE);
+                        memcpy(&tmp[0], &image[it], MAX_PACKET_SIZE);
+                        //memcpy(&receiving[it], &image[it], MAX_PACKET_SIZE);
                         //tmp[MAX_PACKET_SIZE]=0;
                         data[i].setData(tmp);
                         data[i].setSeq(i);
+                        memcpy(&receiving[it], &(data[i].getData())[0], MAX_PACKET_SIZE);
                         it+=MAX_PACKET_SIZE;
                     }
                     i++;
@@ -60,6 +67,10 @@ int PacketStream::initFile(char* filename){
                 flg=true;
                 //if (image)
                    // delete image;
+                f = fopen("tester.jpg", "w+");
+                fwrite(receiving, sizeof(char), size, f);
+                free(receiving);
+                fclose(f);
                 return 0;
             // }
             // else

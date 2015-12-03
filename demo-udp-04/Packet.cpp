@@ -47,7 +47,7 @@ int Packet::getSeq() {
     return atoi(seq);
 }
 void Packet::setData(char* c) {
-    strcpy(data, c);
+    memcpy(&data[0], &c[0], PAYLOAD_SIZE);
 }
 char* Packet::getData() {
     return data;
