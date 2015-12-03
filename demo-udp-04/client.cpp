@@ -36,7 +36,7 @@
 #include <sstream>
 #include "port.h"
 #include "PacketStream.h"
-#define BUFLEN 1034
+#define BUFLEN 1035
 using namespace std;
 using std::ios;
 int main(int argc, char **argv)
