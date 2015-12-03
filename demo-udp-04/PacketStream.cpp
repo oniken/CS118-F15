@@ -25,7 +25,6 @@ int PacketStream::initFile(char* filename){
                 long i=0;
                 long it=0;
 
-                unsigned char* receiving = (unsigned char*) malloc(size);
 
                 while(i<packetNumber) {
                     if(i==packetNumber-1) {
@@ -42,7 +41,6 @@ int PacketStream::initFile(char* filename){
                         //tmp[lastPacketSize]=0;
                         data[i].setData(tmp);
                         data[i].setSeq(i);
-                        memcpy(&receiving[it], &(data[i].getData())[0], lastPacketSize);
                         break;
                     }
                     else {
@@ -59,7 +57,6 @@ int PacketStream::initFile(char* filename){
                         //tmp[MAX_PACKET_SIZE]=0;
                         data[i].setData(tmp);
                         data[i].setSeq(i);
-                        memcpy(&receiving[it], &(data[i].getData())[0], MAX_PACKET_SIZE);
                         it+=MAX_PACKET_SIZE;
                     }
                     i++;
@@ -67,10 +64,6 @@ int PacketStream::initFile(char* filename){
                 flg=true;
                 //if (image)
                    // delete image;
-                f = fopen("tester.jpg", "w+");
-                fwrite(receiving, sizeof(char), size, f);
-                free(receiving);
-                fclose(f);
                 return 0;
             // }
             // else

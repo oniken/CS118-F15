@@ -3,8 +3,8 @@
 Packet::Packet(char* stuff) {
     packet tmp;
     memcpy(&tmp,stuff,sizeof(tmp));
-    strcpy(data, tmp.data);
-    strcpy(seq, tmp.seq);
+    memcpy(&data[0], &tmp.data[0], PAYLOAD_SIZE);
+    memcpy(&seq[0], &tmp.seq[0], 9);
     Corrupted=tmp.Corrupted;
 }
 Packet::Packet() {

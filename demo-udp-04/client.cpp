@@ -89,7 +89,7 @@ int main(void)
 		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 		do{
 			printf("Sending file request packet for file %s to %s port %d\n", buf, server, SERVICE_PORT);
-			if (sendto(fd, fileName.c_str(),fileName.size()-1, 0, (struct sockaddr *)&remaddr, slen)==-1) {
+			if (sendto(fd, (void*)fileName.c_str(),fileName.size()-1, 0, (struct sockaddr *)&remaddr, slen)==-1) {
 				perror("sendto");
 				exit(1);
 			}
@@ -120,7 +120,7 @@ int main(void)
         ack0.setSeq(0);
         ack0.setData("0");
         printf("Sending Ack %d\n", ack0.getSeq());
-		if (sendto(fd, (char*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+		if (sendto(fd, (void*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 			perror("sendto");
 			exit(1);
 		}
@@ -129,7 +129,7 @@ int main(void)
             if (recvlen > 0) {
                 Packet curr = (Packet) buf;
                 if (curr.getSeq() != 0) {
-	            	if (sendto(fd, (char*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+	            	if (sendto(fd, (void*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 	            		perror("sendto");
 	            		exit(1);
 	            	}
@@ -190,7 +190,7 @@ int main(void)
 	                    if (curr.getSeq() + 1 <= nPackets) {
 	                    printf("The ACKDATA is %s\n", toSend.getData());
 	                    printf("The ACKSEQ is %d\n", toSend.getSeq());
-			        	if (sendto(fd, (char*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+			        	if (sendto(fd, (void*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 			        		perror("sendto");
 			        		exit(1);
 			        	}
