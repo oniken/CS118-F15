@@ -36,7 +36,7 @@
 #include <sstream>
 #include "port.h"
 #include "PacketStream.h"
-#define BUFLEN 1035
+#define BUFLEN 1036
 using namespace std;
 using std::ios;
 int main(int argc, char **argv)
@@ -55,7 +55,6 @@ int main(int argc, char **argv)
         cout << "Probability of loss and corruption must be less than 1" << endl;
         exit(1);
     }
-    strcpy(buf, argv[3]);
 
 	/* create a socket */
 
@@ -85,14 +84,18 @@ int main(int argc, char **argv)
 		fprintf(stderr, "inet_aton() failed\n");
 		exit(1);
 	}
-    string fileName=buf;
+	strcpy(buf, argv[3]);
+    char fn[BUFLEN];
+    strcpy(fn, buf);
 	/* now let's send the messages */
 	struct timeval tv;
-	tv.tv_sec=2;
+	tv.tv_sec=1;
 	tv.tv_usec=0;
 	Packet num;
-	//setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
+	setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 	do{
+		bzero(buf, BUFLEN);
+		strcpy(buf, argv[3]);
 		printf("Sending file request packet for file %s to %s port %d\n", buf, server, portno);
         num.setData(buf);
         num.setSeq(-1);
@@ -121,9 +124,11 @@ int main(int argc, char **argv)
 
 	    }
 	}while(recvlen<0);
-
+	tv.tv_sec=0;
+	tv.tv_usec=0;
+	setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 	if(strcmp(num.getData(),"-1")==0) {
-        cout << "File " << fileName << "did not exist" << endl;
+        cout << "File " << fn << "did not exist" << endl;
 		exit(1);
 	}
 	long fileSize=atol(num.getData());
@@ -165,6 +170,7 @@ int main(int argc, char **argv)
 					perror("sendto");
 					exit(1);
 				}
+				bzero(buf, BUFLEN);
 				continue;
             }
             if (curr.getSeq() == -1)  {
@@ -215,6 +221,7 @@ int main(int argc, char **argv)
 	            Packet curr =(Packet) buf;
                 if (curr.isLost()) {
                     cout << "Assuming packet is lost\n\n\n";
+                    bzero(buf, BUFLEN);
                     continue;
                 }
                 if(curr.isCorrupted()) {
@@ -230,6 +237,7 @@ int main(int argc, char **argv)
 		        		perror("sendto");
 		        		exit(1);
 		        	}
+		        	bzero(buf, BUFLEN);
 		        	continue;
                 }
                 printf("Received seq number %d\n", curr.getSeq());
@@ -244,9 +252,9 @@ int main(int argc, char **argv)
                     toSend.setData("");
 		        	toSend.setSeq(curr.getSeq() + 1);
                     if (curr.getSeq() + 1 <= nPackets) {
-                    printf("The ACKDATA is %s\n", toSend.getData());
                     printf("The ACKSEQ is %d\n", toSend.getSeq());
                     toSend.setIsLost(loss);
+                    printf("The isLost is %d\n", (int)toSend.isLost());
                     toSend.setIsCorrupted(corrupted);
 		        	if (sendto(fd, (void*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 		        		perror("sendto");
@@ -282,12 +290,12 @@ int main(int argc, char **argv)
         }
 	}
     if (nPackets > 0) {
-		fileName.erase(remove(fileName.begin(),fileName.end(),'\n'), fileName.end());
-		FILE* f = fopen(fileName.c_str(), "w+");
+		//fileName.erase(remove(fileName.begin(),fileName.end(),'\n'), fileName.end());
+		FILE* f = fopen(fn, "w+");
 		if(f==NULL)
 			printf("Failed to open write file\n");
 		fwrite(op2,sizeof(char), fileSize,f);
-	    printf("Received file %s\n", fileName.c_str());
+	    printf("Received file %s\n", fn);
 	    fclose(f);
     }
     while ((recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen))) {

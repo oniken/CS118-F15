@@ -26,7 +26,7 @@
 #include "port.h"
 #include "PacketStream.h"
 
-#define BUFSIZE 1035
+#define BUFSIZE 1036
 #define WINDOW_SIZE 5
 
 using namespace std;
@@ -182,7 +182,7 @@ int main(int argc, char **argv)
 			    perror("sendto");
                 sent_packets.push_back(i);
             }
-
+            bzero(buf, BUFSIZE);
             while ((recvlen = recvfrom(fd, buf, BUFSIZE, 0, (struct sockaddr *)&remaddr, &addrlen))) {
                 if (recvlen < 0) {
                     list<int>::iterator it = sent_packets.begin();
@@ -213,7 +213,9 @@ int main(int argc, char **argv)
                 else {
                     Packet num = (Packet)buf;
                     if(num.isLost()) {
-		            	cout << "Assuming packet is lost\n\n\n";
+		            	cout << "Assuming packet is lost\n";
+		            	cout<<"Lost Packet Contents:\n";
+		            	cout<<"Seq: "<<num.getSeq()<<endl;
 		                bzero(buf, BUFSIZE);
 		                continue;
 		            }
