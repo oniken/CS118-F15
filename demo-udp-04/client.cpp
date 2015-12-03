@@ -258,7 +258,7 @@ int main(void)
 		    fclose(f);
 	    }
         free(op2);
-		close(fd);
 	}
+		close(fd);
 	return 0;
 }
