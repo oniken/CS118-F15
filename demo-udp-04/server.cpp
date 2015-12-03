@@ -85,12 +85,11 @@ int main(int argc, char **argv)
             if (fileName.getSeq() == -2) {
                 Packet lastfyn;
                 lastfyn.setSeq(-2);
-
-            lastfyn.setIsLost(loss);
-            lastfyn.setIsCorrupted(corruption);
-			if (sendto(fd, (char*)&lastfyn, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
-                exit(1);
-            continue;
+	            lastfyn.setIsLost(loss);
+	            lastfyn.setIsCorrupted(corruption);
+				if (sendto(fd, (char*)&lastfyn, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
+	                exit(1);
+	            continue;
             }
             if (fileName.getSeq() != -1) {
                 cout << "Didn't receive a filename" << endl;
@@ -220,8 +219,10 @@ int main(int argc, char **argv)
 		                continue;
 		            }
 		            if(num.isCorrupted()) {
+		            	//TODO: FIX!
 		            	cout << "Assuming packet is corrupted\n\n\n";
 		                bzero(buf, BUFSIZE);
+		                continue;
 		                Packet p=packetsToSend.get(sent_packets.front());
 		                p.setIsLost(loss);
                         p.setIsCorrupted(corruption);
@@ -229,12 +230,11 @@ int main(int argc, char **argv)
 		                continue;
 		            }
                     if (num.getSeq() == -2) {
-                        // got the fyn signal
                         Packet curr;
                         curr.setSeq(-2);
-                         curr.setIsLost(loss);
-                         curr.setIsCorrupted(corruption);
-	                     if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
+                        curr.setIsLost(loss);
+                        curr.setIsCorrupted(corruption);
+	                    if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
                         break;
                     }
                     printf("Received ACKData %s\n", num.getData());

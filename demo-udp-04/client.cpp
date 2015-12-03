@@ -290,7 +290,6 @@ int main(int argc, char **argv)
         }
 	}
     if (nPackets > 0) {
-		//fileName.erase(remove(fileName.begin(),fileName.end(),'\n'), fileName.end());
 		FILE* f = fopen(fn, "w+");
 		if(f==NULL)
 			printf("Failed to open write file\n");
@@ -298,7 +297,21 @@ int main(int argc, char **argv)
 	    printf("Received file %s\n", fn);
 	    fclose(f);
     }
+    tv.tv_sec=1;
+	tv.tv_usec=0;
+	setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
     while ((recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen))) {
+    	if(recvlen<0) {
+    		Packet curr_fyn;
+            curr_fyn.setSeq(-2);
+	        curr_fyn.setIsLost(loss);
+	        curr_fyn.setIsCorrupted(corrupted);
+			if (sendto(fd,(void*) &curr_fyn,sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+				perror("sendto");
+				exit(1);
+			}
+			continue;
+    	}
         Packet fyn = (Packet) buf;
         if (fyn.getSeq() == -2) {
             break;
@@ -306,12 +319,12 @@ int main(int argc, char **argv)
         else {
             Packet curr_fyn;
             curr_fyn.setSeq(-2);
-        curr_fyn.setIsLost(loss);
-        curr_fyn.setIsCorrupted(corrupted);
-		if (sendto(fd,(void*) &curr_fyn,sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
-			perror("sendto");
-			exit(1);
-		}
+	        curr_fyn.setIsLost(loss);
+	        curr_fyn.setIsCorrupted(corrupted);
+			if (sendto(fd,(void*) &curr_fyn,sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+				perror("sendto");
+				exit(1);
+			}
         }
     }
     free(op2);
