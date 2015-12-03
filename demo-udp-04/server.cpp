@@ -206,7 +206,7 @@ int main(int argc, char **argv)
                              cout << "Pushed into list " << sent_packets.back()<< endl;
                         }
                         if (sent_packets.empty()) {
-                            printf("Finished file transfer");
+                            printf("Finished file transfer\n");
                             break;
                         }
                     //}
@@ -234,7 +234,6 @@ int main(int argc, char **argv)
 					perror("sendto");
 			}
             */
-            printf("Finished sending file!");
 		}
 		bzero(buf, BUFSIZE);
 	}

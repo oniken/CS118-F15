@@ -254,7 +254,7 @@ int main(void)
 				printf("Failed to open write file\n");
 			//fwrite(op.c_str(),sizeof(char), op.length(),f);
 			fwrite(op2,sizeof(char), fileSize,f);
-		    printf("Received file %s", fileName.c_str());
+		    printf("Received file %s\n", fileName.c_str());
 		    fclose(f);
 	    }
         free(op2);

@@ -75,6 +75,7 @@ PacketStream::PacketStream(int startingseq) {
 }
 PacketStream::~PacketStream() 
 {
+    delete[] data;
 }
 PacketStream::PacketStream(){
     start_seq=0;

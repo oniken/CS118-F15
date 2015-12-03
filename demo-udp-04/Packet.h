@@ -38,6 +38,7 @@ class Packet {
     public:
         Packet(char* stuff);
         Packet();
+        ~Packet();
         //void setIsAck(bool x);
         //bool isAck();
         bool isCorrupted();

@@ -1,5 +1,5 @@
 #include "Packet.h"
-
+Packet::~Packet() {}
 Packet::Packet(char* stuff) {
     packet tmp;
     memcpy(&tmp,stuff,sizeof(tmp));
