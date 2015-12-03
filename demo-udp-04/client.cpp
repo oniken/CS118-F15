@@ -94,7 +94,9 @@ int main(int argc, char **argv)
 	//setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 	do{
 		printf("Sending file request packet for file %s to %s port %d\n", buf, server, portno);
-		if (sendto(fd, (void*)fileName.c_str(),fileName.size(), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+        num.setData(buf);
+        num.setSeq(-1);
+		if (sendto(fd,(void*) &num,sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 			perror("sendto");
 			exit(1);
 		}
@@ -142,6 +144,11 @@ int main(int argc, char **argv)
             Packet curr = (Packet) buf;
             if (curr.isLost()) {
                 cout << "Assuming packet is lost\n\n\n";
+                bzero(buf, BUFLEN);
+                continue;
+            }
+            if (curr.getSeq() == -1)  {
+                cout << "We received nPackets again" << endl;
                 bzero(buf, BUFLEN);
                 continue;
             }

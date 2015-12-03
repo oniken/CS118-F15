@@ -81,13 +81,19 @@ int main(int argc, char **argv)
 		recvlen = recvfrom(fd, buf, BUFSIZE, 0, (struct sockaddr *)&remaddr, &addrlen);
 		if (recvlen > 0) {
 			buf[recvlen] = 0;
-			printf("received message: \"%s\" (%d bytes)\n", buf, recvlen);
+            Packet fileName = (Packet) buf;
+            if (fileName.getSeq() != -1) {
+                cout << "Didn't receive a filename" << endl;
+                continue;
+            }
+			printf("received message: \"%s\" \n", fileName.getData());
 		}
 		else {
 			printf("uh oh - something went wrong!\n");
 			continue;
 		}
 		Packet nPackets;
+        nPackets.setSeq(-1);
 		PacketStream packetsToSend;
 		int s=0;
 		bool flg=false;
@@ -122,6 +128,10 @@ int main(int argc, char **argv)
 			if (recvlen >= 0) {
 		        Packet ack = (Packet)buf;
 		        printf("received AckData 0: %s\n", ack.getData());
+                if (ack.getSeq() == -1) {
+                    cout << "Received a filename again" << endl;
+                    continue;
+                }
 		        printf("received AckSeq 0: %s\n", ack.getSeq());
 		        if(!ack.isCorrupted())
 		        	break;
