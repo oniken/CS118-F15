@@ -2,7 +2,7 @@
         demo-udp-03: udp-send: a simple udp client
 	send udp messages
 	This sends a sequence of messages (the # of messages is defined in MSGS)
-	The messages are sent to a port defined in SERVICE_PORT 
+	The messages are sent to a port defined in portno 
 
         usage:  udp-send
 
@@ -26,6 +26,7 @@
 #include <string>
 #include <regex.h>
 #include <sys/stat.h>
+#include <cstring>
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -46,6 +47,11 @@ int main(int argc, char **argv)
 	char buf[BUFLEN];	/* message buffer */
 	int recvlen;		/* # bytes in acknowledgement message */
 	char *server = "127.0.0.1";	/* change this to use a different server */
+
+    int portno = atoi(argv[2]);
+    int loss = atoi(argv[4]);
+    int corrupted = atoi(argv[5]);
+    strcpy(buf, argv[3]);
 
 	/* create a socket */
 
@@ -70,15 +76,13 @@ int main(int argc, char **argv)
 
 	memset((char *) &remaddr, 0, sizeof(remaddr));
 	remaddr.sin_family = AF_INET;
-	remaddr.sin_port = htons(SERVICE_PORT);
+	remaddr.sin_port = htons(portno);
 	if (inet_aton(server, &remaddr.sin_addr)==0) {
 		fprintf(stderr, "inet_aton() failed\n");
 		exit(1);
 	}
 
 	printf("Please enter file name: ");
-    bzero(buf, BUFLEN);
-    fgets(buf, BUFLEN,stdin);
     string fileName=buf;
 	/* now let's send the messages */
 	struct timeval tv;
@@ -87,7 +91,7 @@ int main(int argc, char **argv)
 	Packet num;
 	//setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 	do{
-		printf("Sending file request packet for file %s to %s port %d\n", buf, server, SERVICE_PORT);
+		printf("Sending file request packet for file %s to %s port %d\n", buf, server, portno);
 		if (sendto(fd, (void*)fileName.c_str(),fileName.size()-1, 0, (struct sockaddr *)&remaddr, slen)==-1) {
 			perror("sendto");
 			exit(1);
@@ -102,7 +106,8 @@ int main(int argc, char **argv)
 	}while(recvlen<0||num.isCorrupted());
 
 	if(strcmp(num.getData(),"-1")==0) {
-		continue;
+        cout << "File " << fileName << "did not exist" << endl;
+		exit(1);
 	}
 	long fileSize=atol(num.getData());
     double p=fileSize/MAX_PACKET_SIZE;
@@ -170,7 +175,7 @@ int main(int argc, char **argv)
 	            }
                 else {
 		        	bzero(buf, BUFLEN);
-		        	printf("Sending packet %d to %s port %d\n", curr.getSeq() + 1, server, SERVICE_PORT);
+		        	printf("Sending packet %d to %s port %d\n", curr.getSeq() + 1, server, portno);
 		        	stringstream convert;
                     convert << curr.getSeq() + 1;
                     string c = convert.str();
