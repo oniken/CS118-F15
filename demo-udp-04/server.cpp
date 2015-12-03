@@ -49,8 +49,12 @@ int main(int argc, char **argv)
 	char buf[BUFSIZE];	/* receive buffer */
     int portno = atoi(argv[1]);
     int cwnd = atoi(argv[2]);
-    int loss = atoi(argv[3]);
-    int corruption = atoi(argv[4]);
+    double loss = atoi(argv[3]);
+    double corruption = atoi(argv[4]);
+    if (loss >= 1 || corruption >= 1) {
+        cout << "Probability of loss and corruption must be less than 1" << endl;
+        exit(1);
+    }
 
 
 	/* create a UDP socket */
@@ -129,7 +133,7 @@ int main(int argc, char **argv)
             for (int i = 0; i < min(packetsToSend.getNumOfPacks(), WINDOW_SIZE); i++) {
                 Packet curr = packetsToSend.get(i);
                 printf("sending Packet num : %d\n", curr.getSeq());
-                curr.setIsCorrupted(1);
+                curr.setIsCorrupted(loss);
                 printf("sending Packet corrupted : %d\n", curr.isCorrupted());
 		        if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			    perror("sendto");
