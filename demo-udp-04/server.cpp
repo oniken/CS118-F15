@@ -133,7 +133,7 @@ int main(int argc, char **argv)
             for (int i = 0; i < min(packetsToSend.getNumOfPacks(), WINDOW_SIZE); i++) {
                 Packet curr = packetsToSend.get(i);
                 printf("sending Packet num : %d\n", curr.getSeq());
-                curr.setIsCorrupted(loss);
+                curr.setIsLost(loss);
                 printf("sending Packet corrupted : %d\n", curr.isCorrupted());
 		        if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			    perror("sendto");
