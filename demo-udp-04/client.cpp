@@ -96,6 +96,8 @@ int main(int argc, char **argv)
 		printf("Sending file request packet for file %s to %s port %d\n", buf, server, portno);
         num.setData(buf);
         num.setSeq(-1);
+        num.setIsLost(loss);
+        num.setIsCorrupted(corrupted);
 		if (sendto(fd,(void*) &num,sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 			perror("sendto");
 			exit(1);
@@ -133,6 +135,8 @@ int main(int argc, char **argv)
     Packet ack0;
     ack0.setSeq(0);
     ack0.setData("");
+    ack0.setIsLost(loss);
+    ack0.setIsCorrupted(corrupted);
     printf("Sending Ack %d\n", ack0.getSeq());
 	if (sendto(fd, (void*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 		perror("sendto");
@@ -153,6 +157,8 @@ int main(int argc, char **argv)
                 continue;
             }
             if (curr.getSeq() != 0) {
+            	curr.setIsLost(loss);
+            	curr.setIsCorrupted(corrupted);
             	if (sendto(fd, (void*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
             		perror("sendto");
             		exit(1);
@@ -168,6 +174,8 @@ int main(int argc, char **argv)
                 printf("Received packet %d\n", curr.getSeq());
                 printf("The ACKDATA is %s\n", toSend.getData());
                 printf("The ACKSEQ is %d\n", toSend.getSeq());
+                toSend.setIsLost(loss);
+                toSend.setIsCorrupted(corrupted);
 	        	if (sendto(fd, (char*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 	        		perror("sendto");
 	        		exit(1);
@@ -206,6 +214,8 @@ int main(int argc, char **argv)
                     if (curr.getSeq() + 1 <= nPackets) {
                     printf("The ACKDATA is %s\n", toSend.getData());
                     printf("The ACKSEQ is %d\n", toSend.getSeq());
+                    toSend.setIsLost(loss);
+                    toSend.setIsCorrupted(corrupted);
 		        	if (sendto(fd, (void*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 		        		perror("sendto");
 		        		exit(1);
