@@ -112,10 +112,15 @@ int main(int argc, char **argv)
                 bzero(buf, BUFLEN);
                 continue;
             }
+            if(num.isCorrupted()) {
+            	cout << "Assuming packet is corrupted\n\n\n";
+                bzero(buf, BUFLEN);
+            	continue;
+            }
 	        printf("received message: \"%s\"\n", num.getData());
 
 	    }
-	}while(recvlen<0||num.isCorrupted());
+	}while(recvlen<0);
 
 	if(strcmp(num.getData(),"-1")==0) {
         cout << "File " << fileName << "did not exist" << endl;
@@ -151,14 +156,25 @@ int main(int argc, char **argv)
                 bzero(buf, BUFLEN);
                 continue;
             }
+            if(curr.isCorrupted()) {
+            	cout << "Assuming packet is corrupted\n\n\n";
+            	ack0.setIsLost(loss);
+			    ack0.setIsCorrupted(corrupted);
+			    printf("Sending Ack %d\n", ack0.getSeq());
+				if (sendto(fd, (void*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+					perror("sendto");
+					exit(1);
+				}
+				continue;
+            }
             if (curr.getSeq() == -1)  {
                 cout << "We received nPackets again" << endl;
                 bzero(buf, BUFLEN);
                 continue;
             }
             if (curr.getSeq() != 0) {
-            	curr.setIsLost(loss);
-            	curr.setIsCorrupted(corrupted);
+            	ack0.setIsLost(loss);
+            	ack0.setIsCorrupted(corrupted);
             	if (sendto(fd, (void*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
             		perror("sendto");
             		exit(1);
@@ -192,6 +208,7 @@ int main(int argc, char **argv)
     }
     bzero(buf, BUFLEN);
     if(!one) {
+    	int smallestPacketNum=1;
         while ((recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen))) {
 	        if (recvlen >= 0) {
 	        	printf("entered recvlen\n");
@@ -199,6 +216,21 @@ int main(int argc, char **argv)
                 if (curr.isLost()) {
                     cout << "Assuming packet is lost\n\n\n";
                     continue;
+                }
+                if(curr.isCorrupted()) {
+                	cout << "Assuming packet is corrupted\n\n\n";
+                	Packet toSend;
+                    toSend.setData("");
+		        	toSend.setSeq(smallestPacketNum);
+                    printf("The ACKDATA is %s\n", toSend.getData());
+                    printf("The ACKSEQ is %d\n", toSend.getSeq());
+                    toSend.setIsLost(loss);
+                    toSend.setIsCorrupted(corrupted);
+		        	if (sendto(fd, (void*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+		        		perror("sendto");
+		        		exit(1);
+		        	}
+		        	continue;
                 }
                 printf("Received seq number %d\n", curr.getSeq());
 	            if(packetstream.insert(curr, curr.getSeq())==-1) {
@@ -226,6 +258,7 @@ int main(int argc, char **argv)
                     bool file_done = false;
                     for (int i = 0; i < nPackets; i++) {
                         if (checked[i] == false) {
+                        	smallestPacketNum=max(i,1);
                             break;
                         }
                         if (i == nPackets - 1) {

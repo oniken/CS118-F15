@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <sstream>
 #include <algorithm>
+#include <unistd.h>
 using namespace std;
 #define PAYLOAD_SIZE 1024
 struct packet {
