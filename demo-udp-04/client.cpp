@@ -290,6 +290,22 @@ int main(int argc, char **argv)
 	    printf("Received file %s\n", fileName.c_str());
 	    fclose(f);
     }
+    while ((recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen))) {
+        Packet fyn = (Packet) buf;
+        if (fyn.getSeq() == -2) {
+            break;
+        }
+        else {
+            Packet curr_fyn;
+            curr_fyn.setSeq(-2);
+        curr_fyn.setIsLost(loss);
+        curr_fyn.setIsCorrupted(corrupted);
+		if (sendto(fd,(void*) &curr_fyn,sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+			perror("sendto");
+			exit(1);
+		}
+        }
+    }
     free(op2);
 	close(fd);
 	return 0;

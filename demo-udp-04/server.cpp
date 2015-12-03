@@ -82,6 +82,16 @@ int main(int argc, char **argv)
 		if (recvlen > 0) {
 			buf[recvlen] = 0;
             Packet fileName = (Packet) buf;
+            if (fileName.getSeq() == -2) {
+                Packet lastfyn;
+                lastfyn.setSeq(-2);
+
+            lastfyn.setIsLost(loss);
+            lastfyn.setIsCorrupted(corruption);
+			if (sendto(fd, (char*)&lastfyn, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
+                exit(1);
+            continue;
+            }
             if (fileName.getSeq() != -1) {
                 cout << "Didn't receive a filename" << endl;
                 continue;
@@ -216,6 +226,15 @@ int main(int argc, char **argv)
                         sendto(fd, (char*)&p, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
 		                continue;
 		            }
+                    if (num.getSeq() == -2) {
+                        // got the fyn signal
+                        Packet curr;
+                        curr.setSeq(-2);
+                         curr.setIsLost(loss);
+                         curr.setIsCorrupted(corruption);
+	                     if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
+                        break;
+                    }
                     printf("Received ACKData %s\n", num.getData());
                     printf("Received ACKSeq %d\n", num.getSeq());
                     if (num.getSeq() - 1 >= *(sent_packets.begin())) {
