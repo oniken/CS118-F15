@@ -132,7 +132,7 @@ int main(int argc, char **argv)
     }
     Packet ack0;
     ack0.setSeq(0);
-    ack0.setData("0");
+    ack0.setData("");
     printf("Sending Ack %d\n", ack0.getSeq());
 	if (sendto(fd, (void*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 		perror("sendto");
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
 	        	bzero(buf, BUFLEN);
 	        	stringstream convert;
 	        	Packet toSend;
-	        	toSend.setData("1");
+	        	toSend.setData("");
 	        	toSend.setSeq(1);
                 printf("Received packet %d\n", curr.getSeq());
                 printf("The ACKDATA is %s\n", toSend.getData());
@@ -200,16 +200,8 @@ int main(int argc, char **argv)
                 else {
 		        	bzero(buf, BUFLEN);
 		        	printf("Sending packet %d to %s port %d\n", curr.getSeq() + 1, server, portno);
-		        	stringstream convert;
-                    convert << curr.getSeq() + 1;
-                    string c = convert.str();
-                    char lol[c.length()];
-                    for (int i = 0; i < c.size(); i++) {
-                        lol[i] = c[i];
-                    }
-                    lol[c.length()] = 0;
 		        	Packet toSend;
-                    toSend.setData(lol);
+                    toSend.setData("");
 		        	toSend.setSeq(curr.getSeq() + 1);
                     if (curr.getSeq() + 1 <= nPackets) {
                     printf("The ACKDATA is %s\n", toSend.getData());

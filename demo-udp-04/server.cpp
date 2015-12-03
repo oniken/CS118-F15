@@ -113,11 +113,12 @@ int main(int argc, char **argv)
 			char* image="-1";
             s = 2;
 			nPackets.setData(image);
+			nPackets.setSeq(-1);
 		}
 		bzero(buf, BUFSIZE);
 		struct timeval tv;
-		tv.tv_sec=0;
-		tv.tv_usec=10000;
+		tv.tv_sec=1;
+		tv.tv_usec=0;
 		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 		do {
 			printf("sending response \"%s\"\n", nPackets.getData());
@@ -179,8 +180,8 @@ int main(int argc, char **argv)
                     Packet num = (Packet)buf;
                     printf("Received ACKData %s\n", num.getData());
                     printf("Received ACKSeq %d\n", num.getSeq());
-                    if (atoi(num.getData()) - 1 >= *(sent_packets.begin())) {
-                        acks.insert(atoi(num.getData()) - 1);
+                    if (num.getSeq() - 1 >= *(sent_packets.begin())) {
+                        acks.insert(num.getSeq() - 1);
                         cout << "Inserted an ACK into data structure" << endl;
                     }
                     list<int>::iterator it = sent_packets.begin();
