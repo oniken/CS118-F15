@@ -123,6 +123,7 @@ int main(int argc, char **argv)
 		do {
 			printf("sending response \"%s\"\n", nPackets.getData());
             nPackets.setIsLost(loss);
+            nPackets.setIsCorrupted(corruption);
 			if (sendto(fd, (char*)&nPackets, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 				perror("sendto");
 			recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &addrlen);
@@ -146,6 +147,7 @@ int main(int argc, char **argv)
                 Packet curr = packetsToSend.get(i);
                 printf("sending Packet num : %d\n", curr.getSeq());
                 curr.setIsLost(loss);
+            curr.setIsCorrupted(corruption);
 		        if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			    perror("sendto");
                 sent_packets.push_back(i);
@@ -158,6 +160,7 @@ int main(int argc, char **argv)
                     while (it != sent_packets.end()) {
                         if (ack_it == acks.end()) {
                             Packet curr = packetsToSend.get(*it);
+            curr.setIsCorrupted(corruption);
                             curr.setIsLost(loss);
                             sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
                             it++;
@@ -170,6 +173,7 @@ int main(int argc, char **argv)
                             else {
                                 Packet curr = packetsToSend.get(*it);
                                 curr.setIsLost(loss);
+                                curr.setIsCorrupted(corruption);
                                 sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
                                 it++;
                             }
@@ -205,6 +209,7 @@ int main(int argc, char **argv)
                          printf("Sending packet %d since we received ACK %s\n", sent_packets.back() + 1, num.getData());
                          Packet curr = packetsToSend.get(sent_packets.back()+1);
                          curr.setIsLost(loss);
+                         curr.setIsCorrupted(corruption);
 	                     if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 		                 perror("sendto");
                          sent_packets.push_back(sent_packets.back() + 1);
