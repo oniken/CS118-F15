@@ -36,7 +36,9 @@ class Packet {
         Packet();
         ~Packet();
         bool isCorrupted();
+        bool isLost();
         void setIsCorrupted(float x);
+        void setIsLost(float x);
         int getSeq();
         void setData(char* c);
         char* getData();
@@ -45,5 +47,6 @@ class Packet {
         char data[PAYLOAD_SIZE+1];
         char seq[9]; 
         bool Corrupted;
+        bool Lost;
         
 };

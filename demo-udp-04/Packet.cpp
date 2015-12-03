@@ -16,6 +16,9 @@ Packet::Packet() {
 bool Packet::isCorrupted() {
     return Corrupted;
 }
+bool Packet::isLost() {
+    return Lost;
+}
 void Packet::setIsCorrupted(float x) {
     srand(time(NULL));
     if(x>rand()) {
@@ -23,6 +26,14 @@ void Packet::setIsCorrupted(float x) {
     }
     else
         Corrupted=true;
+}
+void Packet::setIsLost(float x) {
+    srand(time(NULL));
+    if(x>rand()) {
+        Lost=false;
+    }
+    else
+        Lost=true;
 }
 int Packet::getSeq() {
     return atoi(seq);
