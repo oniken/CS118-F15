@@ -222,11 +222,12 @@ int main(int argc, char **argv)
 		            	//TODO: FIX!
 		            	cout << "Assuming packet is corrupted\n\n\n";
 		                bzero(buf, BUFSIZE);
-		                continue;
+                        if (!sent_packets.empty()) {
 		                Packet p=packetsToSend.get(sent_packets.front());
 		                p.setIsLost(loss);
                         p.setIsCorrupted(corruption);
                         sendto(fd, (char*)&p, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
+                        }
 		                continue;
 		            }
                     if (num.getSeq() == -2) {
