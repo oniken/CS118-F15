@@ -84,17 +84,16 @@ int main(int argc, char **argv)
 		int s=0;
 		bool flg=false;
 		if(packetsToSend.initFile(buf)==0) {
-		// 	string op="";
-		// for(int i=0;i<packetsToSend.getNumOfPacks();i++) {
-		// 	op+=(packetsToSend.get(i)).getData();
-		// }
-		// 	FILE* f = fopen("test.jpg", "wb");
-		// 	if(f==NULL)
-		// 		printf("Failed to open write file\n");
-		// 	fwrite(op.c_str(),sizeof(char), op.length(),f);
-		//     fclose(f);
+			// char op2[packetsToSend.getFileSize()];
+			// for(int i=0;i<packetsToSend.getNumOfPacks();i++) {
+			// 	strcat(op2, (packetsToSend.get(i)).getData());
+			// }
+			// FILE* f = fopen("test.jpg", "wb");
+			// if(f==NULL)
+			// 	printf("Failed to open write file\n");
+			// fwrite(op2,sizeof(char), packetsToSend.getFileSize(),f);
+		 //    fclose(f);
 			stringstream convert;
-			//convert<<packetsToSend.getNumOfPacks();
 			convert<<packetsToSend.getFileSize();
 			string c=convert.str();
 			char lol[c.length()];

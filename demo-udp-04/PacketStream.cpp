@@ -17,8 +17,7 @@ int PacketStream::initFile(char* filename){
                 fread(image, sizeof(char), size,f);
                 fclose(f);
                 fileSize=size;
-                long tmpSize=size;
-                double p=tmpSize/MAX_PACKET_SIZE;
+                double p=fileSize/MAX_PACKET_SIZE;
                 packetNumber=ceil(p);
                 long lastPacketSize=size%(MAX_PACKET_SIZE);
                 packetNumber=(lastPacketSize)?packetNumber+1:packetNumber;
@@ -28,29 +27,33 @@ int PacketStream::initFile(char* filename){
                 while(i<packetNumber) {
                     if(i==packetNumber-1) {
                         char tmp[MAX_PACKET_SIZE];
-                        long j=0;
-                        while(j<lastPacketSize) {
-                            tmp[j]=image[it];
-                            j++;
-                            it++;
-                        }
-                        tmp[j]=0;
+                        // long j=0;
+                        // while(j<lastPacketSize) {
+                        //     tmp[j]=image[it];
+                        //     j++;
+                        //     it++;
+                        // }
+                        // tmp[j]=0;
+                        strncpy(tmp, image+it, lastPacketSize);
+                        //tmp[lastPacketSize]=0;
                         data[i].setData(tmp);
                         data[i].setSeq(i);
                         break;
                     }
                     else {
-                        long tmp_size = MAX_PACKET_SIZE;
-                        char tmp[tmp_size];
-                        long j=0;
-                        while(j<(MAX_PACKET_SIZE)) {
-                            tmp[j]=image[it];
-                            j++;
-                            it++;
-                        }
-                        tmp[j]=0;
+                        char tmp[MAX_PACKET_SIZE];
+                        // long j=0;
+                        // while(j<(MAX_PACKET_SIZE)) {
+                        //     tmp[j]=image[it];
+                        //     j++;
+                        //     it++;
+                        // }
+                        // tmp[j]=0;
+                        strncpy(tmp, image+it, MAX_PACKET_SIZE);
+                        //tmp[MAX_PACKET_SIZE]=0;
                         data[i].setData(tmp);
                         data[i].setSeq(i);
+                        it+=MAX_PACKET_SIZE;
                     }
                     i++;
                 }

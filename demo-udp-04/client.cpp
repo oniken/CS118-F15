@@ -238,21 +238,12 @@ int main(void)
 		}
 
 */
-		// int fileSize=0;
-		// for(int i=0;i<nPackets;i++) {
-		// 	fileSize+=sizeof((packetstream.get(i)).getData());
-		// }
 		char op2[fileSize];
 		for(int i=0;i<nPackets;i++) {
 			strcat(op2, (packetstream.get(i)).getData());
 		}
-
-
 	    if (nPackets > 0) {
 			fileName.erase(remove(fileName.begin(),fileName.end(),'\n'), fileName.end());
-			// ofstream ofs(fileName.c_str(), ofstream::out|ofstream::binary);
-		 //    ofs<<op;
-		 //    ofs.close();
 			FILE* f = fopen(fileName.c_str(), "wb");
 			if(f==NULL)
 				printf("Failed to open write file\n");
