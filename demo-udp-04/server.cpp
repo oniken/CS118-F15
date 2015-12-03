@@ -88,15 +88,6 @@ int main(int argc, char **argv)
 		int s=0;
 		bool flg=false;
 		if(packetsToSend.initFile(buf)==0) {
-			// char op2[packetsToSend.getFileSize()];
-			// for(int i=0;i<packetsToSend.getNumOfPacks();i++) {
-			// 	strcat(op2, (packetsToSend.get(i)).getData());
-			// }
-			// FILE* f = fopen("test.jpg", "wb");
-			// if(f==NULL)
-			// 	printf("Failed to open write file\n");
-			// fwrite(op2,sizeof(char), packetsToSend.getFileSize(),f);
-		 //    fclose(f);
 			stringstream convert;
 			convert<<packetsToSend.getFileSize();
 			string c=convert.str();
@@ -125,7 +116,6 @@ int main(int argc, char **argv)
 			recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &addrlen);
 			if (recvlen >= 0) {
 		        Packet ack = (Packet)buf;
-		        //printf("received Ack 0: \"%d\"\n", ack.getACK());
 		        printf("received AckData 0: %s\n", ack.getData());
 		        printf("received AckSeq 0: %s\n", ack.getSeq());
 		        if(!ack.isCorrupted())
@@ -147,7 +137,6 @@ int main(int argc, char **argv)
             }
 
             while ((recvlen = recvfrom(fd, buf, BUFSIZE, 0, (struct sockaddr *)&remaddr, &addrlen))) {
-                // TODO add error check here
                 if (recvlen < 0) {
                     list<int>::iterator it = sent_packets.begin();
                     set<int>::iterator ack_it = acks.begin();
@@ -172,74 +161,45 @@ int main(int argc, char **argv)
                 }
                 else {
                     Packet num = (Packet)buf;
-                    // if (num.isCorrupted()) {
-                    //     printf("Received corrupted packet %d\n", num.getACK());
-                    //     continue;
-                    // }
-                   // else {
-                        //printf("Received ACK %d\n", num.getACK());
-                        printf("Received ACKData %s\n", num.getData());
-                        printf("Received ACKSeq %d\n", num.getSeq());
-                        if (atoi(num.getData()) - 1 >= *(sent_packets.begin())) {
-                            acks.insert(atoi(num.getData()) - 1);
-                            cout << "Inserted an ACK into data structure" << endl;
-                        }
-                        list<int>::iterator it = sent_packets.begin();
-                        set<int>::iterator ack_it = acks.begin();
-                        while (ack_it != acks.end() && *ack_it == *it) {
-                            printf("Entered here\n");
-                            int ack_target = *ack_it;
-                            int list_target = *it;
-                            ack_it++;
-                            it++;
-                            printf("acks size before erase: %d\n", acks.size());
-                            acks.erase(ack_target);
-                            printf("acks size after erase: %d\n", acks.size());
-                            sent_packets.pop_front();
-                        }
-                             printf("The size of list is %d\n", sent_packets.size());
-                             printf("The back is %d\n", sent_packets.back());
-                             printf("%d\n", packetsToSend.getNumOfPacks() - 1);
-                        while (sent_packets.size() < WINDOW_SIZE && sent_packets.back() < packetsToSend.getNumOfPacks() - 1) {
+                    printf("Received ACKData %s\n", num.getData());
+                    printf("Received ACKSeq %d\n", num.getSeq());
+                    if (atoi(num.getData()) - 1 >= *(sent_packets.begin())) {
+                        acks.insert(atoi(num.getData()) - 1);
+                        cout << "Inserted an ACK into data structure" << endl;
+                    }
+                    list<int>::iterator it = sent_packets.begin();
+                    set<int>::iterator ack_it = acks.begin();
+                    while (ack_it != acks.end() && *ack_it == *it) {
+                        printf("Entered here\n");
+                        int ack_target = *ack_it;
+                        int list_target = *it;
+                        ack_it++;
+                        it++;
+                        printf("acks size before erase: %d\n", acks.size());
+                        acks.erase(ack_target);
+                        printf("acks size after erase: %d\n", acks.size());
+                        sent_packets.pop_front();
+                    }
+                         printf("The size of list is %d\n", sent_packets.size());
+                         printf("The back is %d\n", sent_packets.back());
+                         printf("%d\n", packetsToSend.getNumOfPacks() - 1);
+                    while (sent_packets.size() < WINDOW_SIZE && sent_packets.back() < packetsToSend.getNumOfPacks() - 1) {
 
-                             printf("Sending packet %d since we received ACK %s\n", sent_packets.back() + 1, num.getData());
-                             Packet curr = packetsToSend.get(sent_packets.back()+1);
-		                     if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
-			                 perror("sendto");
-                             sent_packets.push_back(sent_packets.back() + 1);
-                             cout << "Pushed into list " << sent_packets.back()<< endl;
-                        }
-                        if (sent_packets.empty()) {
-                            printf("Finished file transfer\n");
-                            break;
-                        }
-                    //}
+                         printf("Sending packet %d since we received ACK %s\n", sent_packets.back() + 1, num.getData());
+                         Packet curr = packetsToSend.get(sent_packets.back()+1);
+	                     if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
+		                 perror("sendto");
+                         sent_packets.push_back(sent_packets.back() + 1);
+                         cout << "Pushed into list " << sent_packets.back()<< endl;
+                    }
+                    if (sent_packets.empty()) {
+                        printf("Finished file transfer\n");
+                        break;
+                    }
                 }
                 bzero(buf, BUFSIZE);
             }
-
-			/* now loop, receiving data and printing what we received */
-            /*
-			for (int i=0;i<packetsToSend.getNumOfPacks();i++) {
-				bzero(buf, BUFSIZE);
-				printf("waiting on port %d\n", portno);
-				recvlen = recvfrom(fd, buf, BUFSIZE, 0, (struct sockaddr *)&remaddr, &addrlen);
-				if (recvlen > 0) {
-					buf[recvlen] = 0;
-					printf("received message: \"%s\" (%d bytes)\n", buf, recvlen);
-				}
-				else
-					printf("uh oh - something went wrong!\n");
-				int getNum=atoi(buf);
-				sprintf(buf, "ack %d", msgcnt++);
-				printf("sending response \"%s\"\n", buf);
-				nPackets=*(packetsToSend.get(getNum));
-				if (sendto(fd, (char*)&nPackets, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
-					perror("sendto");
-			}
-            */
 		}
 		bzero(buf, BUFSIZE);
 	}
-	/* never exits */
 }

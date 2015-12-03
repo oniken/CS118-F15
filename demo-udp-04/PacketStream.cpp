@@ -1,77 +1,47 @@
 #include "PacketStream.h"
 
 int PacketStream::initFile(char* filename){
-            //ifstream f(filename, ios::in|ios::binary|ios::ate);
-            FILE* f = fopen(filename, "r");
-            if(f==NULL)
-                return -1;
-            fseek(f, 0L, SEEK_END);
-            long size = ftell(f);
-            fseek(f, 0L, SEEK_SET);
-            // if(f.is_open()) {
-            //     size=f.tellg();
-                char image[size];
-                // f.seekg(0, ios::beg);
-                // f.read(image, size);
-                // f.close();
-                fread(image, sizeof(char), size,f);
-                fclose(f);
-                fileSize=size;
-                double p=fileSize/MAX_PACKET_SIZE;
-                packetNumber=ceil(p);
-                long lastPacketSize=size%(MAX_PACKET_SIZE);
-                packetNumber=(lastPacketSize)?packetNumber+1:packetNumber;
-                data= new Packet[packetNumber];
-                long i=0;
-                long it=0;
+    FILE* f = fopen(filename, "r");
+    if(f==NULL)
+        return -1;
+    fseek(f, 0L, SEEK_END);
+    long size = ftell(f);
+    fseek(f, 0L, SEEK_SET);
+    char image[size];
+    fread(image, sizeof(char), size,f);
+    fclose(f);
+    fileSize=size;
+    double p=fileSize/MAX_PACKET_SIZE;
+    packetNumber=ceil(p);
+    long lastPacketSize=size%(MAX_PACKET_SIZE);
+    packetNumber=(lastPacketSize)?packetNumber+1:packetNumber;
+    data= new Packet[packetNumber];
+    long i=0;
+    long it=0;
 
 
-                while(i<packetNumber) {
-                    if(i==packetNumber-1) {
-                        char tmp[MAX_PACKET_SIZE];
-                        // long j=0;
-                        // while(j<lastPacketSize) {
-                        //     tmp[j]=image[it];
-                        //     j++;
-                        //     it++;
-                        // }
-                        // tmp[j]=0;
-                        memcpy(&tmp[0], &image[it], lastPacketSize);
-                        //memcpy(&receiving[it], &image[it], lastPacketSize);
-                        //tmp[lastPacketSize]=0;
-                        data[i].setData(tmp);
-                        data[i].setSeq(i);
-                        break;
-                    }
-                    else {
-                        char tmp[MAX_PACKET_SIZE];
-                        // long j=0;
-                        // while(j<(MAX_PACKET_SIZE)) {
-                        //     tmp[j]=image[it];
-                        //     j++;
-                        //     it++;
-                        // }
-                        // tmp[j]=0;
-                        memcpy(&tmp[0], &image[it], MAX_PACKET_SIZE);
-                        //memcpy(&receiving[it], &image[it], MAX_PACKET_SIZE);
-                        //tmp[MAX_PACKET_SIZE]=0;
-                        data[i].setData(tmp);
-                        data[i].setSeq(i);
-                        it+=MAX_PACKET_SIZE;
-                    }
-                    i++;
-                }
-                flg=true;
-                //if (image)
-                   // delete image;
-                return 0;
-            // }
-            // else
-            //     return -1;
+    while(i<packetNumber) {
+        if(i==packetNumber-1) {
+            char tmp[MAX_PACKET_SIZE];
+            memcpy(&tmp[0], &image[it], lastPacketSize);
+            data[i].setData(tmp);
+            data[i].setSeq(i);
+            break;
+        }
+        else {
+            char tmp[MAX_PACKET_SIZE];
+            memcpy(&tmp[0], &image[it], MAX_PACKET_SIZE);
+            data[i].setData(tmp);
+            data[i].setSeq(i);
+            it+=MAX_PACKET_SIZE;
+        }
+        i++;
+    }
+    flg=true;
+    return 0;
 }
 PacketStream::PacketStream(int startingseq) {
             start_seq=startingseq;
-            max_seq=0;
 }
 PacketStream::~PacketStream() 
 {
@@ -79,7 +49,6 @@ PacketStream::~PacketStream()
 }
 PacketStream::PacketStream(){
     start_seq=0;
-    max_seq=0;
     flg=false;
 }
 long PacketStream::getFileSize() {

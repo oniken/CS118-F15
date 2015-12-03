@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 	//setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 	do{
 		printf("Sending file request packet for file %s to %s port %d\n", buf, server, portno);
-		if (sendto(fd, (void*)fileName.c_str(),fileName.size()-1, 0, (struct sockaddr *)&remaddr, slen)==-1) {
+		if (sendto(fd, (void*)fileName.c_str(),fileName.size(), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 			perror("sendto");
 			exit(1);
 		}
