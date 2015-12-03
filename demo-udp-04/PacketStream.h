@@ -25,7 +25,7 @@ class PacketStream {
         ~PacketStream();
         int initFile(char* filename);
         Packet get(int x);
-        streampos getFileSize();
+        long getFileSize();
         int getNumOfPacks();
         int getSizeOfPacket(int i);
         int setDataSize(int s);
@@ -33,8 +33,8 @@ class PacketStream {
     private:
         int start_seq;
         int max_seq;
-        streampos size;
+        long fileSize;
         Packet* data;
-        int packetNumber;
+        long packetNumber;
         bool flg;
 };

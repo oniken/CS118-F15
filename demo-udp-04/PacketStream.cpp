@@ -1,28 +1,38 @@
 #include "PacketStream.h"
 
 int PacketStream::initFile(char* filename){
-            ifstream f(filename, ios::in|ios::binary|ios::ate);
-
-            if(f.is_open()) {
-                size=f.tellg();
-                char* image=new char[size];
-                f.seekg(0, ios::beg);
-                f.read(image, size);
-                f.close();
-                int tmpSize=(static_cast<int>(size));
-                float p=tmpSize/MAX_PACKET_SIZE;
+            //ifstream f(filename, ios::in|ios::binary|ios::ate);
+            FILE* f = fopen(filename, "r");
+            if(f==NULL)
+                return -1;
+            fseek(f, 0L, SEEK_END);
+            long size = ftell(f);
+            fseek(f, 0L, SEEK_SET);
+            // if(f.is_open()) {
+            //     size=f.tellg();
+                char image[size];
+                // f.seekg(0, ios::beg);
+                // f.read(image, size);
+                // f.close();
+                fread(image, sizeof(char), size,f);
+                fclose(f);
+                fileSize=size;
+                long tmpSize=size;
+                double p=tmpSize/MAX_PACKET_SIZE;
                 packetNumber=ceil(p);
-                int lastPacketSize=size%(MAX_PACKET_SIZE);
+                long lastPacketSize=size%(MAX_PACKET_SIZE);
                 packetNumber=(lastPacketSize)?packetNumber+1:packetNumber;
                 data= new Packet[packetNumber];
-                int i=0;
+                long i=0;
+                long it=0;
                 while(i<packetNumber) {
                     if(i==packetNumber-1) {
-                        char* tmp=new char[MAX_PACKET_SIZE];
-                        int j=0;
+                        char tmp[MAX_PACKET_SIZE];
+                        long j=0;
                         while(j<lastPacketSize) {
-                            tmp[j]=image[j];
+                            tmp[j]=image[it];
                             j++;
+                            it++;
                         }
                         tmp[j]=0;
                         data[i].setData(tmp);
@@ -30,27 +40,27 @@ int PacketStream::initFile(char* filename){
                         break;
                     }
                     else {
-                        int tmp_size = MAX_PACKET_SIZE;
-                        char* tmp=new char[tmp_size];
-                        int j=0;
+                        long tmp_size = MAX_PACKET_SIZE;
+                        char tmp[tmp_size];
+                        long j=0;
                         while(j<(MAX_PACKET_SIZE)) {
-                            tmp[j]=image[j];
+                            tmp[j]=image[it];
                             j++;
+                            it++;
                         }
                         tmp[j]=0;
                         data[i].setData(tmp);
                         data[i].setSeq(i);
-                        image+=(MAX_PACKET_SIZE);
                     }
                     i++;
                 }
                 flg=true;
-                if (image)
+                //if (image)
                    // delete image;
                 return 0;
-            }
-            else
-                return -1;
+            // }
+            // else
+            //     return -1;
 }
 PacketStream::PacketStream(int startingseq) {
             start_seq=startingseq;
@@ -64,8 +74,8 @@ PacketStream::PacketStream(){
     max_seq=0;
     flg=false;
 }
-streampos PacketStream::getFileSize() {
-    return size;
+long PacketStream::getFileSize() {
+    return fileSize;
 }
 Packet PacketStream::get(int x) {
     return data[x];

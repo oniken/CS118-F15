@@ -84,8 +84,18 @@ int main(int argc, char **argv)
 		int s=0;
 		bool flg=false;
 		if(packetsToSend.initFile(buf)==0) {
+		// 	string op="";
+		// for(int i=0;i<packetsToSend.getNumOfPacks();i++) {
+		// 	op+=(packetsToSend.get(i)).getData();
+		// }
+		// 	FILE* f = fopen("test.jpg", "wb");
+		// 	if(f==NULL)
+		// 		printf("Failed to open write file\n");
+		// 	fwrite(op.c_str(),sizeof(char), op.length(),f);
+		//     fclose(f);
 			stringstream convert;
-			convert<<packetsToSend.getNumOfPacks();
+			//convert<<packetsToSend.getNumOfPacks();
+			convert<<packetsToSend.getFileSize();
 			string c=convert.str();
 			char lol[c.length()];
 			for(int i=0;i<c.length();i++)
@@ -104,7 +114,7 @@ int main(int argc, char **argv)
 		struct timeval tv;
 		tv.tv_sec=5;
 		tv.tv_usec=0;
-		//setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
+		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 		do {
 			printf("sending response \"%s\"\n", nPackets.getData());
 			if (sendto(fd, (char*)&nPackets, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)

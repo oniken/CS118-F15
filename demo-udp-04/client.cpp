@@ -86,7 +86,7 @@ int main(void)
 		tv.tv_sec=2;
 		tv.tv_usec=0;
 		Packet num;
-		//setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
+		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 		do{
 			printf("Sending file request packet for file %s to %s port %d\n", buf, server, SERVICE_PORT);
 			if (sendto(fd, fileName.c_str(),fileName.size()-1, 0, (struct sockaddr *)&remaddr, slen)==-1) {
@@ -105,8 +105,11 @@ int main(void)
 		if(strcmp(num.getData(),"-1")==0) {
 			continue;
 		}
-
-	    int nPackets=atoi(num.getData());
+		long fileSize=atol(num.getData());
+	    double p=fileSize/MAX_PACKET_SIZE;
+        int nPackets=ceil(p);
+        long lastPacketSize=fileSize%(MAX_PACKET_SIZE);
+        nPackets=(lastPacketSize)?nPackets+1:nPackets;
 	    PacketStream packetstream;
 	    packetstream.setDataSize(nPackets);
         bool *checked = new bool[nPackets];
@@ -235,27 +238,28 @@ int main(void)
 		}
 
 */
-		string op="";
+		// int fileSize=0;
+		// for(int i=0;i<nPackets;i++) {
+		// 	fileSize+=sizeof((packetstream.get(i)).getData());
+		// }
+		char op2[fileSize];
 		for(int i=0;i<nPackets;i++) {
-			// stringstream convert;
-   //          convert << i;
-   //          string c = convert.str();
-   //          char lol[c.length()];
-   //          for (int j = 0; j < c.size(); j++) {
-   //              lol[j] = c[j];
-   //          }
-   //          lol[c.length()] = 0;
-			// ofstream of("Packet "+lol, ofstream::out);
-		 //    of<<(packetstream.get(i)).getData();
-		 //    of.close();
-			op+=(packetstream.get(i)).getData();
+			strcat(op2, (packetstream.get(i)).getData());
 		}
+
+
 	    if (nPackets > 0) {
 			fileName.erase(remove(fileName.begin(),fileName.end(),'\n'), fileName.end());
-			ofstream ofs(fileName.c_str(), ofstream::out|ofstream::binary);
-		    ofs<<op;
-		    ofs.close();
+			// ofstream ofs(fileName.c_str(), ofstream::out|ofstream::binary);
+		 //    ofs<<op;
+		 //    ofs.close();
+			FILE* f = fopen(fileName.c_str(), "wb");
+			if(f==NULL)
+				printf("Failed to open write file\n");
+			//fwrite(op.c_str(),sizeof(char), op.length(),f);
+			fwrite(op2,sizeof(char), fileSize,f);
 		    printf("Received file %s", fileName.c_str());
+		    fclose(f);
 	    }
 		close(fd);
 	}
