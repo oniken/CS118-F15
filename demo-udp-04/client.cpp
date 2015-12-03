@@ -149,7 +149,10 @@ int main(int argc, char **argv)
 	        	Packet toSend;
 	        	toSend.setData("1");
 	        	toSend.setSeq(1);
-                if (curr.isLost()) continue;
+                if (curr.isLost()) {
+                    cout << "Assuming packet is lost\n\n\n";
+                    continue;
+                }
                 printf("Received packet %d\n", curr.getSeq());
                 printf("The ACKDATA is %s\n", toSend.getData());
                 printf("The ACKSEQ is %d\n", toSend.getSeq());
@@ -173,7 +176,10 @@ int main(int argc, char **argv)
 	        if (recvlen >= 0) {
 	        	printf("entered recvlen\n");
 	            Packet curr =(Packet) buf;
-                if (curr.isLost()) continue;
+                if (curr.isLost()) {
+                    cout << "Assuming packet is lost\n\n\n";
+                    continue;
+                }
                 printf("Received seq number %d\n", curr.getSeq());
 	            if(packetstream.insert(curr, curr.getSeq())==-1) {
 	            	printf("Insertion in packet stream at larger than size.\n");
