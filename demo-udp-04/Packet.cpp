@@ -23,7 +23,8 @@ bool Packet::isLost() {
 }
 void Packet::setIsCorrupted(float x) {
     srand(time(NULL));
-    if(x>rand()) {
+    float r=((double)rand())/((double)RAND_MAX);
+    if(x<=r) {
         Corrupted=false;
     }
     else
@@ -31,7 +32,8 @@ void Packet::setIsCorrupted(float x) {
 }
 void Packet::setIsLost(float x) {
     srand(time(NULL));
-    if(x>rand()) {
+    float r=((double)rand())/((double)RAND_MAX);
+    if(x<=r) {
         Lost=false;
     }
     else

@@ -85,8 +85,6 @@ int main(int argc, char **argv)
 		fprintf(stderr, "inet_aton() failed\n");
 		exit(1);
 	}
-
-	printf("Please enter file name: ");
     string fileName=buf;
 	/* now let's send the messages */
 	struct timeval tv;
@@ -105,7 +103,13 @@ int main(int argc, char **argv)
 		recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen);
 		if (recvlen >= 0) {
 	        num = (Packet)buf;
+	        if (num.isLost()) {
+                cout << "Assuming packet is lost\n\n\n";
+                bzero(buf, BUFLEN);
+                continue;
+            }
 	        printf("received message: \"%s\"\n", num.getData());
+
 	    }
 	}while(recvlen<0||num.isCorrupted());
 
@@ -136,6 +140,11 @@ int main(int argc, char **argv)
     while ((recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &slen))) {
         if (recvlen > 0) {
             Packet curr = (Packet) buf;
+            if (curr.isLost()) {
+                cout << "Assuming packet is lost\n\n\n";
+                bzero(buf, BUFLEN);
+                continue;
+            }
             if (curr.getSeq() != 0) {
             	if (sendto(fd, (void*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
             		perror("sendto");
@@ -149,10 +158,6 @@ int main(int argc, char **argv)
 	        	Packet toSend;
 	        	toSend.setData("1");
 	        	toSend.setSeq(1);
-                if (curr.isLost()) {
-                    cout << "Assuming packet is lost\n\n\n";
-                    continue;
-                }
                 printf("Received packet %d\n", curr.getSeq());
                 printf("The ACKDATA is %s\n", toSend.getData());
                 printf("The ACKSEQ is %d\n", toSend.getSeq());

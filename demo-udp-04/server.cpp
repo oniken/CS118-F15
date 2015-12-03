@@ -110,8 +110,8 @@ int main(int argc, char **argv)
 		}
 		bzero(buf, BUFSIZE);
 		struct timeval tv;
-		tv.tv_sec=5;
-		tv.tv_usec=0;
+		tv.tv_sec=0;
+		tv.tv_usec=10000;
 		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 		do {
 			printf("sending response \"%s\"\n", nPackets.getData());
