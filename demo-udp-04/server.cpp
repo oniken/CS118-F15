@@ -49,8 +49,8 @@ int main(int argc, char **argv)
 	char buf[BUFSIZE];	/* receive buffer */
     int portno = atoi(argv[1]);
     int cwnd = atoi(argv[2]);
-    double loss = atoi(argv[3]);
-    double corruption = atoi(argv[4]);
+    double loss = atof(argv[3]);
+    double corruption = atof(argv[4]);
     if (loss >= 1 || corruption >= 1) {
         cout << "Probability of loss and corruption must be less than 1" << endl;
         exit(1);

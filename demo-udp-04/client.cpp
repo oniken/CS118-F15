@@ -49,8 +49,8 @@ int main(int argc, char **argv)
 	char *server = "127.0.0.1";	/* change this to use a different server */
 
     int portno = atoi(argv[2]);
-    double loss = atoi(argv[4]);
-    double corrupted = atoi(argv[5]);
+    double loss = atof(argv[4]);
+    double corrupted = atof(argv[5]);
     if (loss >= 1 || corrupted >= 1) {
         cout << "Probability of loss and corruption must be less than 1" << endl;
         exit(1);
