@@ -29,6 +29,7 @@ struct packet {
             char data[PAYLOAD_SIZE+1];
             char seq[9]; ;
             bool Corrupted;
+            bool Lost;
         };
 class Packet {
     public:

@@ -6,8 +6,10 @@ Packet::Packet(char* stuff) {
     memcpy(&data[0], &tmp.data[0], PAYLOAD_SIZE);
     memcpy(&seq[0], &tmp.seq[0], 9);
     Corrupted=tmp.Corrupted;
+    Lost=tmp.Lost;
 }
 Packet::Packet() {
+    Lost=false;
     Corrupted=false;
     seq[0]='0';
     seq[1]=0;
