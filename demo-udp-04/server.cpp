@@ -134,7 +134,6 @@ int main(int argc, char **argv)
                 Packet curr = packetsToSend.get(i);
                 printf("sending Packet num : %d\n", curr.getSeq());
                 curr.setIsLost(loss);
-                printf("sending Packet corrupted : %d\n", curr.isCorrupted());
 		        if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			    perror("sendto");
                 sent_packets.push_back(i);
@@ -157,6 +156,7 @@ int main(int argc, char **argv)
                             }
                             else {
                                 Packet curr = packetsToSend.get(*it);
+                                curr.setIsLost(loss);
                                 sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
                                 it++;
                             }
@@ -191,6 +191,7 @@ int main(int argc, char **argv)
 
                          printf("Sending packet %d since we received ACK %s\n", sent_packets.back() + 1, num.getData());
                          Packet curr = packetsToSend.get(sent_packets.back()+1);
+                         curr.setIsLost(loss);
 	                     if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 		                 perror("sendto");
                          sent_packets.push_back(sent_packets.back() + 1);
