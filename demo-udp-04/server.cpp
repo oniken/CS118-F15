@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <sstream>
 #include <algorithm>
+#include <math.h>
 #include "port.h"
 #include "PacketStream.h"
 
