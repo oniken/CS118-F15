@@ -24,7 +24,6 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include <sstream>
-#include "port.h"
 #include "PacketStream.h"
 #define BUFLEN 1036
 using namespace std;
@@ -217,7 +216,7 @@ int main(int argc, char **argv)
                 	cout << "Assuming packet is corrupted with Sequence number: "<<curr.getSeq()<<endl;
                 	Packet toSend;
                     toSend.setData("");
-		        	toSend.setSeq(smallestPacketNum);
+		        	toSend.setSeq(smallestPacketNum+1);
                     printf("Retransmitting Ack %d\n", toSend.getSeq());
                     toSend.setIsLost(loss);
                     toSend.setIsCorrupted(corrupted);
@@ -238,22 +237,24 @@ int main(int argc, char **argv)
                     toSend.setData("");
 		        	toSend.setSeq(curr.getSeq() + 1);
                     if (curr.getSeq() + 1 <= nPackets) {
-                    printf("Sending Ack %d\n", toSend.getSeq());
-                    toSend.setIsLost(loss);
-                    toSend.setIsCorrupted(corrupted);
-		        	if (sendto(fd, (void*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
-		        		perror("sendto");
-		        		exit(1);
-		        	}
-                    checked[curr.getSeq()] = true;
+                        printf("Sending Ack %d\n", toSend.getSeq());
+                        toSend.setIsLost(loss);
+                        toSend.setIsCorrupted(corrupted);
+    		        	if (sendto(fd, (void*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
+    		        		perror("sendto");
+    		        		exit(1);
+    		        	}
+                        checked[curr.getSeq()] = true;
                     }
                     bool file_done = false;
                     for (int i = 0; i < nPackets; i++) {
+                        cout<<"Checked num "<<i<<" value: "<<checked[i]<<endl;
                         if (checked[i] == false) {
                         	smallestPacketNum=max(i,1);
                             break;
                         }
                         if (i == nPackets - 1) {
+                            cout<<"Set file_done to true";
                             file_done = true;
                         }
                     }

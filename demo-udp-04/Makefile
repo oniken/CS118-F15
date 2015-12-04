@@ -12,9 +12,9 @@ server: server.cpp
 client: client.cpp 
 	$(CC) $(CFLAGS) -o client client.cpp PacketStream.cpp Packet.cpp
 
-server.o: server.cpp port.h
+server.o: server.cpp
 
-client.o: client.cpp port.h
+client.o: client.cpp
 
 clean:
 	rm -f server client server.o client.o 
