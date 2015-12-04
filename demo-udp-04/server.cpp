@@ -265,7 +265,7 @@ int main(int argc, char **argv)
 
                         sent_packets.pop_front();
                     }
-                    while (sent_packets.size() < cwnd && sent_packets.back().first < packetsToSend.getNumOfPacks() - 1) {
+                    while (!sent_packets.empty() && sent_packets.size() < cwnd && sent_packets.back().first < packetsToSend.getNumOfPacks() - 1 && sent_packets.back().first < sent_packets.front().first + cwnd - 1) {
                          printf("Sending packet %d since we received ACK %d\n", sent_packets.back().first + 1, num.getSeq());
                          Packet curr = packetsToSend.get(sent_packets.back().first+1);
                          curr.setIsLost(loss);
