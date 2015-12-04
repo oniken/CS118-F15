@@ -179,7 +179,7 @@ int main(int argc, char **argv)
             	curr.setIsCorrupted(corruption);
 		        if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 			    perror("sendto");
-                sent_packets.push_back(make_pair(i, time(nullptr)));
+                sent_packets.push_back(make_pair(i, time(NULL)));
             }
             bzero(buf, BUFSIZE);
             setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void*)&tv, sizeof(struct timeval));
@@ -195,13 +195,13 @@ int main(int argc, char **argv)
                             Packet curr = packetsToSend.get(it->first);
             				curr.setIsCorrupted(corruption);
                             curr.setIsLost(loss);
-                            int timeval=time(nullptr);
+                            int timeval=time(NULL);
                             cout<<"timeval: "<<timeval<<endl;
                             double duration = (timeval - it->second);
                             if (duration >= TIMEOUT_SEC) {
                                 cout<<"Packet timed out"<<endl;
                                 sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
-                                it->second = time(nullptr);
+                                it->second = time(NULL);
                             }
                             it++;
                         }
@@ -217,13 +217,13 @@ int main(int argc, char **argv)
                                 Packet curr = packetsToSend.get(it->first);
                                 curr.setIsLost(loss);
                                 curr.setIsCorrupted(corruption);
-                                int timeval=time(nullptr);
+                                int timeval=time(NULL);
                                 cout<<"timeval: "<<timeval<<endl;
                                 double duration = (timeval - it->second);
                                 if (duration >= TIMEOUT_SEC) {
                                     cout<<"Packet timed out"<<endl;
                                     sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
-                                    it->second = time(nullptr);
+                                    it->second = time(NULL);
                                 }
                                 it++;
                             }
@@ -291,7 +291,7 @@ int main(int argc, char **argv)
                          curr.setIsCorrupted(corruption);
 	                     if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 		                 perror("sendto");
-                         sent_packets.push_back(make_pair(sent_packets.back().first + 1, time(nullptr)));
+                         sent_packets.push_back(make_pair(sent_packets.back().first + 1, time(NULL)));
                          cout << "Pushed into list " << sent_packets.back().first<< endl;
                     }
                     if (sent_packets.empty()) {
