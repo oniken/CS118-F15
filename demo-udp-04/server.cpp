@@ -187,6 +187,7 @@ int main(int argc, char **argv)
                     list<pair<int, time_t> >::iterator it = sent_packets.begin();
                     set<int>::iterator ack_it = acks.begin();
                     while (it != sent_packets.end()) {
+                        /*
                         if (ack_it == acks.end()) {
                             Packet curr = packetsToSend.get(it->first);
             				curr.setIsCorrupted(corruption);
@@ -218,7 +219,20 @@ int main(int argc, char **argv)
                                 }
                                 it++;
                             }
+                        }*/
+                        if (acks.find(it->first) == acks.end()) {
+                            Packet curr = packetsToSend.get(it->first);
+            				curr.setIsCorrupted(corruption);
+                            curr.setIsLost(loss);
+                            int timeval=time(NULL);
+                            double duration = (timeval - it->second);
+                            if (duration >= TIMEOUT_SEC) {
+                                cout<<"Packet Timed out, sending packet: "<<curr.getSeq()<<endl;
+                                sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
+                                it->second = time(NULL);
+                            }
                         }
+                        it++;
                     }    
                 }
                 else {
@@ -264,7 +278,7 @@ int main(int argc, char **argv)
                             sent_packets.pop_front();
                         }
                         else
-                            it++;
+                            break;
                     }
                     while (!sent_packets.empty() && sent_packets.size() < cwnd && sent_packets.back().first < packetsToSend.getNumOfPacks() - 1) {
                          Packet curr = packetsToSend.get(sent_packets.back().first+1);
