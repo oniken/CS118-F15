@@ -52,7 +52,7 @@ int main(int argc, char **argv)
     int cwnd = (int)floor(atoi(argv[2])/sizeof(Packet));
     double loss = atof(argv[3]);
     double corruption = atof(argv[4]);
-    if (loss >= 1 || corruption >= 1) {
+    if (loss > 1 || corruption > 1) {
         cout << "Probability of loss and corruption must be less than 1" << endl;
         exit(1);
     }
@@ -96,12 +96,12 @@ int main(int argc, char **argv)
                 continue;
             }
             if(fileName.isLost()) {
-            	cout << "Assuming packet is lost\n";
+            	cout << "Assuming packet is lost with Sequence number: "<<fileName.getSeq()<<endl;
                 bzero(buf, BUFSIZE);
                 continue;
             }
             if(fileName.isCorrupted()) {
-            	cout << "Assuming packet is corrupted\n";
+            	cout << "Assuming packet is corrupted with Sequence number: "<<fileName.getSeq()<<endl;
                 bzero(buf, BUFSIZE);
                 continue;
             }
@@ -151,12 +151,12 @@ int main(int argc, char **argv)
 			if (recvlen >= 0) {
 		        Packet ack = (Packet)buf;
 		        if(ack.isLost()) {
-	            	cout << "Assuming packet is lost\n\n\n";
+	            	cout << "Assuming packet is lost with Sequence number: "<<ack.getSeq()<<endl;
 	                bzero(buf, BUFSIZE);
 	                continue;
 	            }
 	            if(ack.isCorrupted()) {
-	            	cout << "Assuming packet is corrupted\n\n\n";
+	            	cout << "Assuming packet is corrupted with Sequence number: "<<ack.getSeq()<<endl;
 	                bzero(buf, BUFSIZE);
 	                continue;
 	            }
@@ -225,12 +225,12 @@ int main(int argc, char **argv)
                 else {
                     Packet num = (Packet)buf;
                     if(num.isLost()) {
-		            	cout << "Assuming packet is lost\n";
+		            	cout << "Assuming packet is lost with Sequence number: "<<num.getSeq()<<endl;
 		                bzero(buf, BUFSIZE);
 		                continue;
 		            }
 		            if(num.isCorrupted()) {
-		            	cout << "Assuming packet is corrupted\n";
+		            	cout << "Assuming packet is corrupted with Sequence number: "<<num.getSeq()<<endl;
 		                bzero(buf, BUFSIZE);
                         if (!sent_packets.empty()) {
     		                Packet p=packetsToSend.get(sent_packets.front().first);

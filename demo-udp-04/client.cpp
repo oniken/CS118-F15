@@ -40,7 +40,7 @@ int main(int argc, char **argv)
     int portno = atoi(argv[2]);
     double loss = atof(argv[4]);
     double corrupted = atof(argv[5]);
-    if (loss >= 1 || corrupted >= 1) {
+    if (loss > 1 || corrupted > 1) {
         cout << "Probability of loss and corruption must be less than 1" << endl;
         exit(1);
     }
@@ -100,12 +100,12 @@ int main(int argc, char **argv)
 		if (recvlen >= 0) {
 	        num = (Packet)buf;
 	        if (num.isLost()) {
-                cout << "Assuming packet is lost\n";
+                cout << "Assuming packet is lost with Sequence number: "<<num.getSeq()<<endl;
                 bzero(buf, BUFLEN);
                 continue;
             }
             if(num.isCorrupted()) {
-            	cout << "Assuming packet is corrupted\n";
+            	cout << "Assuming packet is corrupted with Sequence number: "<<num.getSeq()<<endl;
                 bzero(buf, BUFLEN);
             	continue;
             }
@@ -149,12 +149,12 @@ int main(int argc, char **argv)
         if (recvlen > 0) {
             Packet curr = (Packet) buf;
             if (curr.isLost()) {
-                cout << "Assuming packet is lost\n";
+                cout << "Assuming packet is lost with Sequence number: "<<curr.getSeq()<<endl;
                 bzero(buf, BUFLEN);
                 continue;
             }
             if(curr.isCorrupted()) {
-            	cout << "Assuming packet is corrupted\n";
+            	cout << "Assuming packet is corrupted with Sequence number: "<<curr.getSeq()<<endl;
             	ack0.setIsLost(loss);
 			    ack0.setIsCorrupted(corrupted);
 			    printf("Retransmitting Ack %d\n", ack0.getSeq());
@@ -209,12 +209,12 @@ int main(int argc, char **argv)
 	        if (recvlen >= 0) {
 	            Packet curr =(Packet) buf;
                 if (curr.isLost()) {
-                    cout << "Assuming packet is lost\n";
+                    cout << "Assuming packet is lost with Sequence number: "<<curr.getSeq()<<endl;
                     bzero(buf, BUFLEN);
                     continue;
                 }
                 if(curr.isCorrupted()) {
-                	cout << "Assuming packet is corrupted\n";
+                	cout << "Assuming packet is corrupted with Sequence number: "<<curr.getSeq()<<endl;
                 	Packet toSend;
                     toSend.setData("");
 		        	toSend.setSeq(smallestPacketNum);
