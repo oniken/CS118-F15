@@ -274,8 +274,9 @@ int main(int argc, char **argv)
                     while (it != sent_packets.end()) {
                         if(acks.find(it->first)!=acks.end())
                         {
+                            list<pair<int, time_t> >::iterator to_delete = it;
                             it++;
-                            sent_packets.pop_front();
+                            sent_packets.erase(to_delete);
                         }
                         else
                             break;
