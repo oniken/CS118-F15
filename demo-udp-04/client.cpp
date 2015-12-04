@@ -248,13 +248,11 @@ int main(int argc, char **argv)
                     }
                     bool file_done = false;
                     for (int i = 0; i < nPackets; i++) {
-                        cout<<"Checked num "<<i<<" value: "<<checked[i]<<endl;
                         if (checked[i] == false) {
                         	smallestPacketNum=max(i,1);
                             break;
                         }
                         if (i == nPackets - 1) {
-                            cout<<"Set file_done to true";
                             file_done = true;
                         }
                     }
