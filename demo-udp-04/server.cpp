@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 	/* create a UDP socket */
 
 	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-		perror("cannot create socket\n");
+		perror("Cannot create socket\n");
 		return 0;
 	}
 
@@ -72,12 +72,12 @@ int main(int argc, char **argv)
 	myaddr.sin_port = htons(portno);
 
 	if (bind(fd, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
-		perror("bind failed");
+		perror("Bind failed");
 		return 0;
 	}
 	while(1) {
 		bzero(buf, BUFSIZE);
-		printf("waiting on port %d\n", portno);
+		printf("Waiting on port %d\n", portno);
 		recvlen = recvfrom(fd, buf, BUFSIZE, 0, (struct sockaddr *)&remaddr, &addrlen);
 		if (recvlen > 0) {
 			buf[recvlen] = 0;
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
                 bzero(buf, BUFSIZE);
                 continue;
             }
-			printf("received message: \"%s\" \n", fileName.getData());
+			printf("Received Message: \"%s\" \n", fileName.getData());
 		}
 		else {
 			continue;
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 		tv.tv_usec=50000;
 		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void*)&tv, sizeof(struct timeval));
 		do {
-			printf("sending response \"%s\"\n", nPackets.getData());
+			printf("Sending Response \"%s\"\n", nPackets.getData());
             nPackets.setIsLost(loss);
             nPackets.setIsCorrupted(corruption);
 			if (sendto(fd, (char*)&nPackets, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
@@ -166,7 +166,7 @@ int main(int argc, char **argv)
                 }
 		        if(!ack.isCorrupted())
 		        	break;
-                printf("received Ack: %d\n", ack.getSeq());
+                printf("Received Ack: %d\n", ack.getSeq());
 		    }
 		    bzero(buf, BUFSIZE);
 		}while(recvlen<0);
@@ -175,7 +175,7 @@ int main(int argc, char **argv)
             set<int> acks;
             for (int i = 0; i < min(packetsToSend.getNumOfPacks(), cwnd); i++) {
                 Packet curr = packetsToSend.get(i);
-                printf("sending Packet num : %d\n", curr.getSeq());
+                printf("Sending Packet: %d\n", curr.getSeq());
                 curr.setIsLost(loss);
             	curr.setIsCorrupted(corruption);
 		        if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
@@ -236,6 +236,7 @@ int main(int argc, char **argv)
     		                Packet p=packetsToSend.get(sent_packets.front().first);
     		                p.setIsLost(loss);
                             p.setIsCorrupted(corruption);
+                            printf("Retransmitting Packet %d\n", p.getSeq());
                             sendto(fd, (char*)&p, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
                         }
 		                continue;
@@ -246,6 +247,7 @@ int main(int argc, char **argv)
                         curr.setSeq(-2);
                         curr.setIsLost(loss);
                         curr.setIsCorrupted(corruption);
+                        cout<<"Sending fin to client."<<endl;
 	                    sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0;
                         printf("Finished file transfer\n");
                         break;
@@ -265,7 +267,7 @@ int main(int argc, char **argv)
 
                         sent_packets.pop_front();
                     }
-                    while (!sent_packets.empty() && sent_packets.size() < cwnd && sent_packets.back().first < packetsToSend.getNumOfPacks() - 1 && sent_packets.back().first < sent_packets.front().first + cwnd - 1) {
+                    while (sent_packets.size() < cwnd && sent_packets.back().first < packetsToSend.getNumOfPacks() - 1) {
                          printf("Sending packet %d since we received ACK %d\n", sent_packets.back().first + 1, num.getSeq());
                          Packet curr = packetsToSend.get(sent_packets.back().first+1);
                          curr.setIsLost(loss);

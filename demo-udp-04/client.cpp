@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 	/* create a socket */
 
 	if ((fd=socket(AF_INET, SOCK_DGRAM, 0))==-1)
-		printf("socket created\n");
+		printf("Error creating socket\n");
 
 	/* bind it to all local addresses and pick any port number */
 
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 	myaddr.sin_port = htons(0);
 
 	if (bind(fd, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
-		perror("bind failed");
+		perror("Bind failed");
 		return 0;
 	}       
 
@@ -157,7 +157,7 @@ int main(int argc, char **argv)
             	cout << "Assuming packet is corrupted\n";
             	ack0.setIsLost(loss);
 			    ack0.setIsCorrupted(corrupted);
-			    printf("Sending Ack %d\n", ack0.getSeq());
+			    printf("Retransmitting Ack %d\n", ack0.getSeq());
 				if (sendto(fd, (void*)&ack0, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
 					perror("sendto");
 					exit(1);
@@ -218,7 +218,7 @@ int main(int argc, char **argv)
                 	Packet toSend;
                     toSend.setData("");
 		        	toSend.setSeq(smallestPacketNum);
-                    printf("Sending Ack %d\n", toSend.getSeq());
+                    printf("Retransmitting Ack %d\n", toSend.getSeq());
                     toSend.setIsLost(loss);
                     toSend.setIsCorrupted(corrupted);
 		        	if (sendto(fd, (void*)&toSend, sizeof(Packet), 0, (struct sockaddr *)&remaddr, slen)==-1) {
