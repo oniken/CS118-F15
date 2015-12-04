@@ -271,9 +271,11 @@ int main(int argc, char **argv)
                     }
                     list<pair<int, time_t> >::iterator it = sent_packets.begin();
                     set<int>::iterator ack_it = acks.begin();
+                    int greatest = -1;
                     while (it != sent_packets.end()) {
                         if(acks.find(it->first)!=acks.end())
                         {
+                            greatest = it->first;
                             list<pair<int, time_t> >::iterator to_delete = it;
                             it++;
                             sent_packets.erase(to_delete);
@@ -281,7 +283,7 @@ int main(int argc, char **argv)
                         else
                             break;
                     }
-                    while (!sent_packets.empty() && sent_packets.size() < cwnd && sent_packets.back().first < packetsToSend.getNumOfPacks() - 1) {
+                    while ((sent_packets.empty() && greatest < packetsToSend.getNumOfPacks() - 1) || (sent_packets.size() < cwnd && sent_packets.back().first < packetsToSend.getNumOfPacks() - 1)) {
                          Packet curr = packetsToSend.get(sent_packets.back().first+1);
                          curr.setIsLost(loss);
                          curr.setIsCorrupted(corruption);
