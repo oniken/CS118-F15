@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <sstream>
 #include <algorithm>
+#include <math.h>
 #include "port.h"
 #include "PacketStream.h"
 
@@ -49,14 +50,13 @@ int main(int argc, char **argv)
 	int msgcnt = 0;			/* count # of messages we received */
 	char buf[BUFSIZE];	/* receive buffer */
     int portno = atoi(argv[1]);
-    int cwnd = atoi(argv[2]);
+    int cwnd = (int)floor(atoi(argv[2])/sizeof(Packet));
     double loss = atof(argv[3]);
     double corruption = atof(argv[4]);
     if (loss >= 1 || corruption >= 1) {
         cout << "Probability of loss and corruption must be less than 1" << endl;
         exit(1);
     }
-
 
 	/* create a UDP socket */
 
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
 		if(flg) {
             list <pair<int, time_t> > sent_packets;
             set<int> acks;
-            for (int i = 0; i < min(packetsToSend.getNumOfPacks(), WINDOW_SIZE); i++) {
+            for (int i = 0; i < min(packetsToSend.getNumOfPacks(), cwnd); i++) {
                 Packet curr = packetsToSend.get(i);
                 printf("sending Packet num : %d\n", curr.getSeq());
                 curr.setIsLost(loss);
@@ -283,7 +283,7 @@ int main(int argc, char **argv)
                      printf("The size of list is %d\n", sent_packets.size());
                      printf("The back is %d\n", sent_packets.back().first);
                      printf("%d\n", packetsToSend.getNumOfPacks() - 1);
-                    while (sent_packets.size() < WINDOW_SIZE && sent_packets.back().first < packetsToSend.getNumOfPacks() - 1) {
+                    while (sent_packets.size() < cwnd && sent_packets.back().first < packetsToSend.getNumOfPacks() - 1) {
 
                          printf("Sending packet %d since we received ACK %d\n", sent_packets.back().first + 1, num.getSeq());
                          Packet curr = packetsToSend.get(sent_packets.back().first+1);
