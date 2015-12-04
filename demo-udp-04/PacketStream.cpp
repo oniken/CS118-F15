@@ -18,8 +18,6 @@ int PacketStream::initFile(char* filename){
     data= new Packet[packetNumber];
     long i=0;
     long it=0;
-
-
     while(i<packetNumber) {
         if(i==packetNumber-1) {
             char tmp[MAX_PACKET_SIZE];
