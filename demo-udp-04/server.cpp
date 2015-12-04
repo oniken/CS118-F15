@@ -137,9 +137,9 @@ int main(int argc, char **argv)
 		}
 		bzero(buf, BUFSIZE);
 		struct timeval tv;
-		tv.tv_sec=1;
+		tv.tv_sec=5;
 		tv.tv_usec=0;
-		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
+		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void*)&tv, sizeof(struct timeval));
 		do {
 			printf("sending response \"%s\"\n", nPackets.getData());
             nPackets.setIsLost(loss);
@@ -159,14 +159,13 @@ int main(int argc, char **argv)
 	                bzero(buf, BUFSIZE);
 	                continue;
 	            }
-		        printf("received AckData 0: %s\n", ack.getData());
                 if (ack.getSeq() == -1) {
                     cout << "Received a filename again" << endl;
                     continue;
                 }
-		        printf("received AckSeq 0: %s\n", ack.getSeq());
 		        if(!ack.isCorrupted())
 		        	break;
+                printf("received AckSeq 0: %d\n", ack.getSeq());
 		    }
 		    bzero(buf, BUFSIZE);
 		}while(recvlen<0);
@@ -183,33 +182,46 @@ int main(int argc, char **argv)
                 sent_packets.push_back(make_pair(i, clock()));
             }
             bzero(buf, BUFSIZE);
+            setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void*)&tv, sizeof(struct timeval));
             while ((recvlen = recvfrom(fd, buf, BUFSIZE, 0, (struct sockaddr *)&remaddr, &addrlen))) {
                 if (recvlen < 0) {
+                    cout<<"Recvfrom timed out"<<endl;
                     list<pair<int, clock_t> >::iterator it = sent_packets.begin();
                     set<int>::iterator ack_it = acks.begin();
                     while (it != sent_packets.end()) {
+                        cout<<"Entered timed out while"<<endl;
                         if (ack_it == acks.end()) {
+                            cout<<"Entered timed out outer if"<<endl;
                             Packet curr = packetsToSend.get(it->first);
             				curr.setIsCorrupted(corruption);
                             curr.setIsLost(loss);
-                            double duration = (clock() - it->second) / (double) CLOCKS_PER_SEC;
+                            int clockval=clock();
+                            cout<<"clockval: "<<clockval<<endl;
+                            double duration = (clockval - it->second) / (double) CLOCKS_PER_SEC;
                             if (duration >= TIMEOUT_SEC) {
+                                cout<<"Packet timed out"<<endl;
                                 sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
                                 it->second = clock();
                             }
                             it++;
                         }
                         else {
+                            cout<<"Entered outer else"<<endl;
                             if (it->first == *ack_it) {
+                                cout<<"Entered inner if"<<endl;
                                 it++;
                                 ack_it++;
                             }
                             else {
+                                cout<<"Entered inner else"<<endl;
                                 Packet curr = packetsToSend.get(it->first);
                                 curr.setIsLost(loss);
                                 curr.setIsCorrupted(corruption);
-                                double duration = (clock() - it->second) / (double) CLOCKS_PER_SEC;
+                                int clockval=clock();
+                                cout<<"clockval: "<<clockval<<endl;
+                                double duration = (clockval - it->second) / (double) CLOCKS_PER_SEC;
                                 if (duration >= TIMEOUT_SEC) {
+                                    cout<<"Packet timed out"<<endl;
                                     sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
                                     it->second = clock();
                                 }
@@ -232,19 +244,21 @@ int main(int argc, char **argv)
 		            	cout << "Assuming packet is corrupted\n\n\n";
 		                bzero(buf, BUFSIZE);
                         if (!sent_packets.empty()) {
-		                Packet p=packetsToSend.get(sent_packets.front().first);
-		                p.setIsLost(loss);
-                        p.setIsCorrupted(corruption);
-                        sendto(fd, (char*)&p, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
+    		                Packet p=packetsToSend.get(sent_packets.front().first);
+    		                p.setIsLost(loss);
+                            p.setIsCorrupted(corruption);
+                            sendto(fd, (char*)&p, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen);
                         }
 		                continue;
 		            }
                     if (num.getSeq() == -2) {
+                        cout<<"Fin received from client."<<endl;
                         Packet curr;
                         curr.setSeq(-2);
                         curr.setIsLost(loss);
                         curr.setIsCorrupted(corruption);
-	                    if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
+	                    if (sendto(fd, (char*)&curr, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0);
+                        printf("Finished file transfer\n");
                         break;
                     }
                     printf("Received ACKData %s\n", num.getData());
@@ -266,9 +280,9 @@ int main(int argc, char **argv)
                         printf("acks size after erase: %d\n", acks.size());
                         sent_packets.pop_front();
                     }
-                         printf("The size of list is %d\n", sent_packets.size());
-                         printf("The back is %d\n", sent_packets.back().first);
-                         printf("%d\n", packetsToSend.getNumOfPacks() - 1);
+                     printf("The size of list is %d\n", sent_packets.size());
+                     printf("The back is %d\n", sent_packets.back().first);
+                     printf("%d\n", packetsToSend.getNumOfPacks() - 1);
                     while (sent_packets.size() < WINDOW_SIZE && sent_packets.back().first < packetsToSend.getNumOfPacks() - 1) {
 
                          printf("Sending packet %d since we received ACK %d\n", sent_packets.back().first + 1, num.getSeq());

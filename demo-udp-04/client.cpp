@@ -120,6 +120,11 @@ int main(int argc, char **argv)
                 bzero(buf, BUFLEN);
             	continue;
             }
+            if(num.getSeq()!=-1) {
+                cout << "Discarding Packet as not npackets.\n";
+                bzero(buf, BUFLEN);
+                continue;
+            }
 	        printf("received message: \"%s\"\n", num.getData());
 
 	    }
@@ -314,6 +319,7 @@ int main(int argc, char **argv)
     	}
         Packet fyn = (Packet) buf;
         if (fyn.getSeq() == -2) {
+            cout<<"Received fin from server"<<endl;
             break;
         }
         else {
