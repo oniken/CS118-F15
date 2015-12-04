@@ -40,16 +40,14 @@ int PacketStream::initFile(char* filename){
     flg=true;
     return 0;
 }
-PacketStream::PacketStream(int startingseq) {
-            start_seq=startingseq;
-}
 PacketStream::~PacketStream() 
 {
-    delete[] data;
+    if(getNumOfPacks()!=-1)
+        delete[] data;
 }
 PacketStream::PacketStream(){
-    start_seq=0;
     flg=false;
+    packetNumber=-1;
 }
 long PacketStream::getFileSize() {
     return fileSize;

@@ -20,7 +20,6 @@ using namespace std;
 
 class PacketStream {
     public:
-        PacketStream(int startingseq);
         PacketStream();
         ~PacketStream();
         int initFile(char* filename);
@@ -31,7 +30,6 @@ class PacketStream {
         int setDataSize(int s);
         int insert(Packet p, int pos);
     private:
-        int start_seq;
         long fileSize;
         Packet* data;
         long packetNumber;

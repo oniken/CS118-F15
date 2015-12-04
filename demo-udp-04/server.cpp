@@ -28,8 +28,7 @@
 #include "PacketStream.h"
 
 #define BUFSIZE 1036
-#define WINDOW_SIZE 5
-#define TIMEOUT_SEC 5
+#define TIMEOUT_SEC 1
 
 using namespace std;
 using std::ios;
@@ -137,8 +136,8 @@ int main(int argc, char **argv)
 		}
 		bzero(buf, BUFSIZE);
 		struct timeval tv;
-		tv.tv_sec=5;
-		tv.tv_usec=0;
+		tv.tv_sec=0;
+		tv.tv_usec=50000;
 		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void*)&tv, sizeof(struct timeval));
 		do {
 			printf("sending response \"%s\"\n", nPackets.getData());
@@ -146,6 +145,9 @@ int main(int argc, char **argv)
             nPackets.setIsCorrupted(corruption);
 			if (sendto(fd, (char*)&nPackets, sizeof(Packet), 0, (struct sockaddr *)&remaddr, addrlen) < 0)
 				perror("sendto");
+            if(!flg) {
+                break;
+            }
 			recvlen = recvfrom(fd, buf, sizeof(Packet), 0, (struct sockaddr *)&remaddr, &addrlen);
 			if (recvlen >= 0) {
 		        Packet ack = (Packet)buf;
@@ -182,7 +184,6 @@ int main(int argc, char **argv)
                 sent_packets.push_back(make_pair(i, time(NULL)));
             }
             bzero(buf, BUFSIZE);
-            setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void*)&tv, sizeof(struct timeval));
             while ((recvlen = recvfrom(fd, buf, BUFSIZE, 0, (struct sockaddr *)&remaddr, &addrlen))) {
                 if (recvlen < 0) {
                     cout<<"Recvfrom timed out"<<endl;

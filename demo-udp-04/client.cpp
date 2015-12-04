@@ -1,13 +1,3 @@
-/*
-        demo-udp-03: udp-send: a simple udp client
-	send udp messages
-	This sends a sequence of messages (the # of messages is defined in MSGS)
-	The messages are sent to a port defined in portno 
-
-        usage:  udp-send
-
-        Paul Krzyzanowski
-*/
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -89,8 +79,8 @@ int main(int argc, char **argv)
     strcpy(fn, buf);
 	/* now let's send the messages */
 	struct timeval tv;
-	tv.tv_sec=1;
-	tv.tv_usec=0;
+	tv.tv_sec=0;
+	tv.tv_usec=50000;
 	Packet num;
 	setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 	do{
@@ -133,7 +123,7 @@ int main(int argc, char **argv)
 	tv.tv_usec=0;
 	setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
 	if(strcmp(num.getData(),"-1")==0) {
-        cout << "File " << fn << "did not exist" << endl;
+        cout << "File " << fn << " did not exist" << endl;
 		exit(1);
 	}
 	long fileSize=atol(num.getData());
